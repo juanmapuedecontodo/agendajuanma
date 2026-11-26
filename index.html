@@ -520,9 +520,9 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 
     <div class="field">
       <label>¿Qué quieres practicar?</label>
- <label><input type="checkbox" disabled> Palabras clave y asociaciones (próximamente)</label>
+      <label><input type="checkbox" name="tarotGameType" value="keywords" checked> Palabras clave y asociaciones</label>
       <label><input type="checkbox" name="tarotGameType" value="general" checked> Significado general</label>
-      <label><input type="checkbox" disabled> Interpretación de situaciones (próximamente)</label>
+      <label><input type="checkbox" name="tarotGameType" value="situation" checked> Interpretación de situaciones</label>
       <label><input type="checkbox" name="tarotGameType" value="yesno" checked> Orientación de sí o no</label>
       <label><input type="checkbox" name="tarotGameType" value="reversed" checked> Significados invertidos</label>
     </div>
@@ -614,6 +614,7 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { TAROT_CARDS, drawTarotCards } from './tarot.js';
+import { TAROT_STUDY } from './tarot-study.js';
 /* CONFIGURACIÓN: URL y clave pública de TU proyecto Supabase. Nunca pongas aquí service_role. */
 const SUPABASE_URL = 'https://qykrjqyrjltxyelbybvl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_GX9Uk67nW__qAJke1Qv3zA_4BjT3dF_';
@@ -797,6 +798,10 @@ function openTarotPanel(panel) {
   if (target) {
     $('#' + target).style.display = 'block';
   }
+
+  if (panel === 'records') {
+    loadTarotRecords();
+  }
 }
 
 function returnToTarotHome() {
@@ -932,7 +937,13 @@ $('#tarotCardFamily').addEventListener('change', renderTarotCompendium);
 renderTarotCompendium();
 
 
-/* JUEGO — MOTOR DE PARTIDAS */
+
+/* =====================================================
+   JUEGO — MOTOR DE PARTIDAS
+   Significados · Sí/no · Invertidas
+   Palabras clave · Situaciones
+   Registro persistente en Supabase
+   ===================================================== */
 
 let tarotGameConfig = null;
 let tarotGameSession = null;
@@ -956,10 +967,9 @@ function buildTarotQuestions(config) {
   config.cards.forEach(card => {
     const questionModes = [];
 
+    // SIGNIFICADO GENERAL
     if (selectedTypes.includes('general')) {
       selectedOrientations.forEach(orientation => {
-        // Evitamos repetir el significado invertido
-        // si también se ha seleccionado el modo específico.
         if (
           orientation === 'invertida' &&
           selectedTypes.includes('reversed')
@@ -978,6 +988,7 @@ function buildTarotQuestions(config) {
       });
     }
 
+    // ORIENTACIÓN DE SÍ O NO
     if (selectedTypes.includes('yesno')) {
       selectedOrientations.forEach(orientation => {
         questionModes.push({
@@ -991,6 +1002,7 @@ function buildTarotQuestions(config) {
       });
     }
 
+    // SIGNIFICADO INVERTIDO
     if (selectedTypes.includes('reversed')) {
       questionModes.push({
         type: 'reversed',
@@ -1000,6 +1012,7 @@ function buildTarotQuestions(config) {
       });
     }
 
+    // PREGUNTAS DE LOS MODOS ANTERIORES
     questionModes.forEach(mode => {
       const correctAnswer = card[mode.field];
 
@@ -1029,6 +1042,101 @@ function buildTarotQuestions(config) {
         options
       });
     });
+
+    // PALABRAS CLAVE
+    if (selectedTypes.includes('keywords')) {
+      selectedOrientations.forEach(orientation => {
+        const study = TAROT_STUDY[card.id];
+        if (!study) return;
+
+        const keywords = orientation === 'normal'
+          ? study.keywords
+          : study.reversedKeywords;
+
+        if (!Array.isArray(keywords) || keywords.length !== 4) return;
+
+        const correctAnswer = keywords.join(' · ');
+        const correctSet = new Set(
+          keywords.map(word => word.trim().toLowerCase())
+        );
+
+        const alternatives = [];
+
+        config.cards.forEach(other => {
+          if (other.id === card.id) return;
+
+          const otherStudy = TAROT_STUDY[other.id];
+          if (!otherStudy) return;
+
+          const otherKeywords = orientation === 'normal'
+            ? otherStudy.keywords
+            : otherStudy.reversedKeywords;
+
+          if (!Array.isArray(otherKeywords) || otherKeywords.length !== 4) {
+            return;
+          }
+
+          const answer = otherKeywords.join(' · ');
+
+          if (answer === correctAnswer) return;
+
+          const sharedWords = otherKeywords.filter(word =>
+            correctSet.has(word.trim().toLowerCase())
+          ).length;
+
+          // Evitamos conjuntos demasiado parecidos.
+          if (sharedWords > 1) return;
+
+          if (!alternatives.includes(answer)) {
+            alternatives.push(answer);
+          }
+        });
+
+        if (alternatives.length < 3) return;
+
+        questions.push({
+          card,
+          type: 'keywords',
+          orientation,
+          prompt: `¿Qué conjunto de palabras clave representa mejor a ${card.name} ${orientation === 'normal' ? 'al derecho' : 'invertida'}?`,
+          correctAnswer,
+          options: shuffleTarotArray([
+            correctAnswer,
+            ...shuffleTarotArray(alternatives).slice(0, 3)
+          ])
+        });
+      });
+    }
+
+    // INTERPRETACIÓN DE SITUACIONES
+    if (selectedTypes.includes('situation')) {
+      const study = TAROT_STUDY[card.id];
+
+      if (
+        study &&
+        typeof study.situation === 'string' &&
+        study.situation.trim()
+      ) {
+        const alternatives = config.cards
+          .filter(other => other.id !== card.id)
+          .map(other => other.name)
+          .filter((name, index, array) => array.indexOf(name) === index);
+
+        if (alternatives.length >= 3) {
+          questions.push({
+            card,
+            type: 'situation',
+            orientation: 'normal',
+            prompt: study.situation,
+            correctAnswer: card.name,
+            options: shuffleTarotArray([
+              card.name,
+              ...shuffleTarotArray(alternatives).slice(0, 3)
+            ])
+          });
+        }
+      }
+    }
   });
 
   return shuffleTarotArray(questions);
@@ -1056,7 +1164,9 @@ function startTarotGame() {
     current: 0,
     score: 0,
     mistakes: [],
-    answered: false
+    answered: false,
+    startedAt: Date.now(),
+    saved: false
   };
 
   $('#tarotGameSetup').style.display = 'none';
@@ -1067,36 +1177,50 @@ function startTarotGame() {
 }
 
 function renderTarotQuestion() {
-  const session = tarotGameSession;
-  const question = session.questions[session.current];
+  const game = tarotGameSession;
+  const question = game.questions[game.current];
+  const isSituation = question.type === 'situation';
 
-  session.answered = false;
+  game.answered = false;
 
   $('#tarotGamePlay').innerHTML = `
     <article class="card">
       <p class="muted">
-        Pregunta ${session.current + 1} de ${session.questions.length}
+        Pregunta ${game.current + 1} de ${game.questions.length}
       </p>
 
       <div style="height:7px;background:var(--paper2);border-radius:10px;margin:12px 0 22px;overflow:hidden">
-        <div style="height:100%;width:${((session.current + 1) / session.questions.length) * 100}%;background:var(--gold);border-radius:10px"></div>
+        <div style="height:100%;width:${((game.current + 1) / game.questions.length) * 100}%;background:var(--gold);border-radius:10px"></div>
       </div>
 
-      <div style="text-align:center;padding:12px">
-        <div style="font-size:48px;margin-bottom:8px">
-          ${esc(question.card.symbol)}
+      ${isSituation ? `
+        <div style="padding:18px;background:var(--paper2);border-radius:14px;margin:12px 0 20px">
+          <p class="muted" style="margin-bottom:8px">🔮 Una situación que interpretar</p>
+          <p style="font-size:16px;line-height:1.6">${esc(question.prompt)}</p>
+        </div>
+      ` : `
+        <div style="text-align:center;padding:12px">
+          <div style="font-size:48px;margin-bottom:8px">
+            ${esc(question.card.symbol)}
+          </div>
+
+          <h3>${esc(question.card.name)}</h3>
+
+          <p class="muted">
+            ${question.orientation === 'invertida'
+              ? '🌙 Carta invertida'
+              : '☀️ Carta al derecho'}
+          </p>
         </div>
 
-        <h3>${esc(question.card.name)}</h3>
+        <h3 style="margin:20px 0">
+          ${esc(question.prompt)}
+        </h3>
+      `}
 
-        <p class="muted">
-          ${question.orientation === 'invertida' ? '🌙 Carta invertida' : '☀️ Carta al derecho'}
-        </p>
-      </div>
-
-      <h3 style="margin:20px 0">
-        ${esc(question.prompt)}
-      </h3>
+      ${isSituation ? `
+        <h3 style="margin:20px 0">¿Qué carta representa mejor esta situación?</h3>
+      ` : ''}
 
       <div id="tarotGameOptions" style="display:grid;gap:10px">
         ${question.options.map((option, index) => `
@@ -1117,24 +1241,30 @@ function renderTarotQuestion() {
 
   $('#tarotGameOptions').addEventListener('click', event => {
     const button = event.target.closest('[data-tarot-answer]');
-    if (!button || session.answered) return;
+    if (!button || game.answered) return;
 
     answerTarotQuestion(Number(button.dataset.tarotAnswer));
   });
 }
 
 function answerTarotQuestion(answerIndex) {
-  const session = tarotGameSession;
-  const question = session.questions[session.current];
+  const game = tarotGameSession;
+  const question = game.questions[game.current];
   const selectedAnswer = question.options[answerIndex];
   const correct = selectedAnswer === question.correctAnswer;
 
-  session.answered = true;
+  game.answered = true;
 
   if (correct) {
-    session.score++;
+    game.score++;
   } else {
-    session.mistakes.push(question);
+    game.mistakes.push({
+      card: question.card,
+      type: question.type,
+      orientation: question.orientation,
+      prompt: question.prompt,
+      correctAnswer: question.correctAnswer
+    });
   }
 
   document.querySelectorAll('[data-tarot-answer]').forEach((button, index) => {
@@ -1152,20 +1282,50 @@ function answerTarotQuestion(answerIndex) {
     }
   });
 
-  const reflection = question.orientation === 'invertida'
-    ? question.card.reversedReflection
-    : question.card.reflection;
+  let reflection = '';
+
+  if (question.type === 'situation') {
+    reflection = question.card.meaning || '';
+  } else if (question.type === 'keywords') {
+    const study = TAROT_STUDY[question.card.id];
+
+    reflection = question.orientation === 'invertida'
+      ? question.card.reversedReflection
+      : question.card.reflection;
+
+    if (!reflection && study) {
+      reflection = question.orientation === 'invertida'
+        ? (study.reversedKeywords || []).join(' · ')
+        : (study.keywords || []).join(' · ');
+    }
+  } else {
+    reflection = question.orientation === 'invertida'
+      ? question.card.reversedReflection
+      : question.card.reflection;
+  }
+
+  const answerHeading = question.type === 'situation'
+    ? 'La carta que mejor representa la situación:'
+    : question.type === 'keywords'
+      ? 'El conjunto de palabras clave:'
+      : 'La respuesta del Compendio:';
 
   $('#tarotGameFeedback').innerHTML = `
     <div class="card" style="margin-top:16px">
       <h3>${correct ? '✨ ¡Correcto!' : '🌙 No exactamente...'}</h3>
 
-      <p><strong>La respuesta del Compendio:</strong></p>
+      <p><strong>${answerHeading}</strong></p>
       <p>${esc(question.correctAnswer)}</p>
+
+      ${question.type === 'situation' ? `
+        <p style="margin-top:12px">
+          <strong>${esc(question.card.name)}</strong>
+        </p>
+      ` : ''}
 
       ${reflection ? `
         <p style="margin-top:12px">
-          <strong>Una reflexión:</strong>
+          <strong>${question.type === 'situation' ? 'Significado de la carta:' : 'Una reflexión:'}</strong>
         </p>
         <p>${esc(reflection)}</p>
       ` : ''}
@@ -1176,7 +1336,7 @@ function answerTarotQuestion(answerIndex) {
         id="tarotGameNext"
         style="width:100%;margin-top:16px"
       >
-        ${session.current + 1 === session.questions.length
+        ${game.current + 1 === game.questions.length
           ? 'Ver resultados'
           : 'Siguiente pregunta →'}
       </button>
@@ -1184,9 +1344,9 @@ function answerTarotQuestion(answerIndex) {
   `;
 
   $('#tarotGameNext').addEventListener('click', () => {
-    session.current++;
+    game.current++;
 
-    if (session.current >= session.questions.length) {
+    if (game.current >= game.questions.length) {
       finishTarotGame();
     } else {
       renderTarotQuestion();
@@ -1194,10 +1354,63 @@ function answerTarotQuestion(answerIndex) {
   });
 }
 
-function finishTarotGame() {
-  const session = tarotGameSession;
-  const total = session.questions.length;
-  const percentage = Math.round((session.score / total) * 100);
+/* =====================================================
+   GUARDAR PARTIDA EN SUPABASE
+   ===================================================== */
+
+async function saveTarotGameRecord(game, percentage) {
+  if (game.saved) return;
+  game.saved = true;
+
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return {
+      error: { message: 'No se ha podido identificar la sesión del usuario.' }
+    };
+  }
+
+  const duration = Math.max(
+    0,
+    Math.round((Date.now() - game.startedAt) / 1000)
+  );
+
+  const mistakes = game.mistakes.map(question => ({
+    card_id: question.card.id,
+    card_name: question.card.name,
+    type: question.type,
+    orientation: question.orientation,
+    prompt: question.prompt,
+    correct_answer: question.correctAnswer
+  }));
+
+  const { error } = await supabase
+    .from('tarot_sessions')
+    .insert({
+      user_id: userId,
+      total_questions: game.questions.length,
+      correct_answers: game.score,
+      percentage,
+      duration_seconds: duration,
+      mistakes,
+      configuration: {
+        families: tarotGameConfig.families,
+        orientations: tarotGameConfig.orientations,
+        types: tarotGameConfig.types
+      }
+    });
+
+  return { error };
+}
+
+/* =====================================================
+   FINALIZAR PARTIDA
+   ===================================================== */
+
+async function finishTarotGame() {
+  const game = tarotGameSession;
+  const total = game.questions.length;
+  const percentage = Math.round((game.score / total) * 100);
 
   $('#tarotGamePlay').style.display = 'none';
   $('#tarotGameResults').style.display = 'block';
@@ -1210,7 +1423,7 @@ function finishTarotGame() {
       <p class="muted">Tu resultado como aprendiz</p>
 
       <div style="font-size:42px;font-weight:bold;color:var(--gold);margin:18px 0">
-        ${session.score} / ${total}
+        ${game.score} / ${total}
       </div>
 
       <h2>${percentage}% de aciertos</h2>
@@ -1224,16 +1437,28 @@ function finishTarotGame() {
               ? 'Vas avanzando. Cada carta tiene algo que enseñarte.'
               : 'Todo aprendizaje comienza con una primera tirada.'}
       </p>
+
+      <p id="tarotGameSaveStatus" class="muted" style="margin-top:16px">
+        <span>⏳ Guardando tu partida...</span>
+      </p>
     </article>
 
-    ${session.mistakes.length ? `
+    ${game.mistakes.length ? `
       <article class="card" style="margin-top:12px">
         <h3>📖 Cartas para repasar</h3>
 
-        ${session.mistakes.map(question => `
+        ${game.mistakes.map(question => `
           <div style="padding:12px 0;border-bottom:1px solid var(--line)">
             <strong>${esc(question.card.name)}</strong>
-            <p class="muted">${question.orientation === 'invertida' ? 'Invertida' : 'Al derecho'}</p>
+            <p class="muted">
+              ${question.type === 'situation'
+                ? 'Interpretación de situación'
+                : question.type === 'keywords'
+                  ? 'Palabras clave'
+                  : question.orientation === 'invertida'
+                    ? 'Invertida'
+                    : 'Al derecho'}
+            </p>
             <p>${esc(question.correctAnswer)}</p>
           </div>
         `).join('')}
@@ -1258,7 +1483,141 @@ function finishTarotGame() {
     $('#tarotGameResults').style.display = 'none';
     $('#tarotGameSetup').style.display = 'block';
   });
+
+  const result = await saveTarotGameRecord(game, percentage);
+  const status = $('#tarotGameSaveStatus');
+
+  if (status) {
+    status.innerHTML = result?.error
+      ? '<span>⚠️ No se ha podido guardar esta partida. Tu resultado sigue disponible en esta pantalla.</span>'
+      : '<span>✨ Partida guardada en el Registro del aprendiz.</span>';
+  }
 }
+
+/* =====================================================
+   REGISTRO DEL APRENDIZ
+   ===================================================== */
+
+async function loadTarotRecords() {
+  const loading = $('#tarotRecordsLoading');
+  const content = $('#tarotRecordsContent');
+  const history = $('#tarotRecordHistory');
+
+  if (!loading || !content || !history) return;
+
+  loading.style.display = 'block';
+  content.style.display = 'none';
+
+  const { data, error } = await supabase
+    .from('tarot_sessions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  loading.style.display = 'none';
+  content.style.display = 'block';
+
+  if (error) {
+    history.innerHTML = `
+      <article class="card">
+        <p>No se ha podido cargar el registro. Inténtalo de nuevo más tarde.</p>
+      </article>
+    `;
+    return;
+  }
+
+  const records = data || [];
+
+  $('#tarotRecordTotal').textContent = records.length;
+
+  if (!records.length) {
+    $('#tarotRecordAverage').textContent = '—';
+    $('#tarotRecordBest').textContent = '—';
+
+    history.innerHTML = `
+      <article class="card" style="text-align:center;padding:24px">
+        <div style="font-size:36px">📖</div>
+        <h3>Tu historia como aprendiz empieza aquí</h3>
+        <p class="muted">
+          Cuando completes tu primera partida, aparecerá aquí tu progreso.
+        </p>
+      </article>
+    `;
+    return;
+  }
+
+  const average = Math.round(
+    records.reduce((sum, record) => sum + Number(record.percentage), 0) /
+    records.length
+  );
+
+  const best = Math.max(
+    ...records.map(record => Number(record.percentage))
+  );
+
+  $('#tarotRecordAverage').textContent = `${average}%`;
+  $('#tarotRecordBest').textContent = `${best}%`;
+
+  history.innerHTML = records.map(record => {
+    const date = new Date(record.created_at).toLocaleString('es-ES', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+
+    const mistakes = Array.isArray(record.mistakes)
+      ? record.mistakes
+      : [];
+
+    const mistakeList = mistakes.length
+      ? `
+        <details style="margin-top:12px">
+          <summary style="cursor:pointer">
+            Ver cartas para repasar (${mistakes.length})
+          </summary>
+          <div style="padding:10px 0">
+            ${mistakes.map(mistake => `
+              <div style="padding:8px 0;border-bottom:1px solid var(--line)">
+                <strong>${esc(mistake.card_name || 'Carta')}</strong>
+                <p class="muted">${esc(mistake.correct_answer || '')}</p>
+              </div>
+            `).join('')}
+          </div>
+        </details>
+      `
+      : '<p class="muted" style="margin-top:8px">¡Sin errores en esta partida! ✨</p>';
+
+    const duration = Number(record.duration_seconds || 0);
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+
+    return `
+      <article class="card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div>
+            <strong>${esc(date)}</strong>
+            <p class="muted" style="margin-top:4px">
+              ${record.correct_answers} de ${record.total_questions} respuestas correctas
+            </p>
+          </div>
+          <strong style="font-size:22px;color:var(--gold)">
+            ${Number(record.percentage)}%
+          </strong>
+        </div>
+
+        <div style="height:7px;background:var(--paper2);border-radius:10px;margin:12px 0;overflow:hidden">
+          <div style="height:100%;width:${Number(record.percentage)}%;background:var(--gold);border-radius:10px"></div>
+        </div>
+
+        <p class="muted">⏱️ ${minutes} min ${seconds} s</p>
+
+        ${mistakeList}
+      </article>
+    `;
+  }).join('');
+}
+
+/* =====================================================
+   INICIAR PARTIDA DESDE LA CONFIGURACIÓN
+   ===================================================== */
 
 $('#tarotGameStart').addEventListener('click', () => {
   const questionCount = Number($('#tarotGameQuestionCount').value);
