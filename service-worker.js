@@ -4,8 +4,9 @@ const CACHE_NAME = "mi-agenda-shell-v2";
 const APP_SHELL = [
   "/",
   "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png"
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", (event) => {
