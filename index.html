@@ -537,21 +537,55 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 </div>
 
   <!-- REGISTRO -->
-  <div id="tarotPanelRecords" style="display:none">
-    <button class="btn" data-tarot-back style="margin-bottom:14px">
-      ← Volver al oráculo
-    </button>
-    <div class="tarot-intro">
-      <div class="tarot-symbol">🏆 ✧</div>
-      <h3>Registro del aprendiz</h3>
-      <p>Un recorrido por tus avances y descubrimientos.</p>
+ 
+<div id="tarotPanelRecords" style="display:none">
+  <button class="btn" data-tarot-back style="margin-bottom:14px">
+    ← Volver al oráculo
+  </button>
+
+  <div class="tarot-intro">
+    <div class="tarot-symbol">🏆 ✧</div>
+    <h3>Registro del aprendiz</h3>
+    <p>Un recorrido por tus avances y descubrimientos.</p>
+  </div>
+
+  <div id="tarotRecordsLoading" class="card">
+    <p class="muted">Consultando los archivos del grimorio...</p>
+  </div>
+
+  <div id="tarotRecordsContent" style="display:none">
+
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px">
+
+      <article class="card" style="text-align:center">
+        <div style="font-size:26px">🎴</div>
+        <p class="muted">Partidas jugadas</p>
+        <h2 id="tarotRecordTotal">0</h2>
+      </article>
+
+      <article class="card" style="text-align:center">
+        <div style="font-size:26px">✨</div>
+        <p class="muted">Media de aciertos</p>
+        <h2 id="tarotRecordAverage">0%</h2>
+      </article>
+
+      <article class="card" style="text-align:center">
+        <div style="font-size:26px">🏆</div>
+        <p class="muted">Mejor resultado</p>
+        <h2 id="tarotRecordBest">0%</h2>
+      </article>
+
     </div>
-    <article class="card">
-      <div class="empty">
-        Aquí quedarán guardadas tus sesiones, puntuaciones y récords.
+
+    <article class="card" style="margin-top:14px">
+      <h3>📜 Historial de partidas</h3>
+      <div id="tarotRecordHistory">
+        <p class="muted">Todavía no hay partidas registradas.</p>
       </div>
     </article>
+
   </div>
+</div>
 
 </section>
 
