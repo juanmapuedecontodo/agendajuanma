@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#26372f">
+<meta name="description" content="Mi grimorio personal: agenda, tareas, economía y trabajo.">
+<title>El Grimorio — Mi agenda personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--forest:#26372f;--forest2:#34483d;--moss:#71836b;--sage:#aab69a;--paper:#f1eadb;--paper2:#e8deca;--ink:#342f29;--muted:#827968;--gold:#b99a62;--plum:#59445e;--rose:#b77d78;--line:rgba(76,65,49,.16);--shadow:0 14px 40px rgba(43,39,30,.12);--radius:20px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#e6ddc9 0,transparent 42%),linear-gradient(135deg,#e9e0ce,#f4eddf 60%,#e7decd);color:var(--ink);font-family:"DM Sans",sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:1180px;margin:auto;min-height:100vh;padding:22px 22px 110px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:13px}.sigil{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--forest);color:#eadfc8;font-size:25px;box-shadow:0 5px 15px #26372f33}.brand h1{font:700 28px "Cormorant Garamond",serif;letter-spacing:.03em;margin:0;color:var(--forest)}.brand small{display:block;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-size:9px;margin-top:1px}
+.top-actions{display:flex;gap:8px}.iconbtn,.btn{border:1px solid var(--line);background:#f8f2e7d9;color:var(--forest);border-radius:13px;padding:10px 13px;transition:transform .22s,background .22s,box-shadow .22s}.iconbtn:hover,.btn:hover{transform:translateY(-2px);box-shadow:0 7px 18px #26372f17}.btn.primary{background:var(--forest);color:#f5eddd;border-color:var(--forest)}.btn.gold{background:var(--gold);color:#241f18;border-color:var(--gold)}.btn.danger{color:#914d49}.btn.small{padding:7px 10px;font-size:12px}
+.hero{position:relative;overflow:hidden;border-radius:26px;background:linear-gradient(110deg,#26372fef,#3c5042eF),url('URL_IMAGEN_CABECERA') center/cover;color:#f4ead8;padding:28px 30px;box-shadow:var(--shadow);min-height:170px;margin-bottom:20px}.hero:after{content:"✧";position:absolute;right:8%;top:-34px;font:150px "Cormorant Garamond";color:#e9d9b522}.hero .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:#d5c49f}.hero h2{font:600 clamp(28px,5vw,43px) "Cormorant Garamond";margin:8px 0 4px;max-width:650px}.hero p{color:#e0d6c4;margin:0;font-size:13px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:26px 2px 13px}.section-head h2{font:600 29px "Cormorant Garamond";color:var(--forest);margin:0}.section-head p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.card{background:linear-gradient(145deg,#fbf6ebed,#eee5d5ed);border:1px solid #fff9;border-radius:var(--radius);padding:17px;box-shadow:0 6px 22px #4038270c;min-width:0;animation:fadeUp .38s both}.card h3{font:600 21px "Cormorant Garamond";color:var(--forest);margin:0 0 11px}.card p{font-size:13px;color:var(--muted)}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}
+.stat{font:600 30px "Cormorant Garamond";color:var(--forest)}.muted{color:var(--muted)}.tiny{font-size:11px;color:var(--muted)}.empty{padding:18px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:14px}
+.nav{position:fixed;z-index:30;bottom:0;left:0;right:0;background:#26372ff2;backdrop-filter:blur(14px);padding:9px max(12px,env(safe-area-inset-left)) calc(9px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:4px}.nav button{border:0;background:transparent;color:#d8d0bf;padding:8px 14px;border-radius:13px;min-width:62px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:.2s}.nav button .ico{font-size:19px}.nav button.active{background:#e7ddc8;color:var(--forest)}
+.view{display:none;animation:fade .3s ease}.view.active{display:block}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.stack{display:grid;gap:9px}.item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none}.dot.simple{background:#779879}.dot.medium{background:#d3a84f}.dot.critical{background:#b85c57}.item-main{min-width:0;flex:1}.item-title{font-weight:600;font-size:13px}.item-sub{font-size:11px;color:var(--muted);margin-top:3px}.hand{font:400 17px "Kalam",cursive}.done{text-decoration:line-through;opacity:.55}.actions{display:flex;gap:5px;flex:none}
+input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;border-radius:11px;padding:11px 12px;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--moss);box-shadow:0 0 0 3px #71836b20}textarea{min-height:76px;resize:vertical}label{display:block;font-size:11px;color:var(--muted);margin:0 0 5px}.field{margin-bottom:11px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.formgrid .wide{grid-column:1/-1}
+.modal-wrap{position:fixed;inset:0;background:#1e2922a8;z-index:60;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(5px)}.modal-wrap.open{display:flex;animation:fade .22s}.modal{width:min(600px,100%);max-height:90vh;overflow:auto;background:var(--paper);border:1px solid #fff8;border-radius:22px;padding:22px;box-shadow:0 25px 80px #0004;animation:pop .28s}.modal h2{font:600 28px "Cormorant Garamond";color:var(--forest);margin:0 0 15px}.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.toast{position:fixed;z-index:90;bottom:90px;left:50%;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:var(--forest);color:#fff1dc;padding:11px 17px;border-radius:14px;font-size:12px;transition:.3s;box-shadow:var(--shadow);max-width:90vw}.toast.show{opacity:1;transform:translate(-50%,0)}
+.login{position:fixed;inset:0;z-index:100;background:linear-gradient(140deg,#1e3028,#4a3c4e);display:grid;place-items:center;padding:20px}.loginbox{width:min(420px,100%);background:#f2eadb;border-radius:26px;padding:30px;text-align:center;box-shadow:0 30px 90px #0005}.loginbox .sigil{margin:0 auto 13px}.loginbox h1{font:700 34px "Cormorant Garamond";color:var(--forest);margin:0}.loginbox p{font-size:13px;color:var(--muted);line-height:1.6}.loginbox .btn{width:100%;margin-top:12px;padding:14px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.day{background:#f9f3e7;border:1px solid var(--line);border-radius:13px;padding:10px 7px;min-height:110px;cursor:pointer;transition:.2s}.day:hover,.day.selected{border-color:var(--gold);background:#eee3cd}.day strong{display:block;font:600 19px "Cormorant Garamond"}.day small{font-size:9px;color:var(--muted);text-transform:uppercase}.day .mini{font-size:10px;margin-top:7px;line-height:1.5;overflow:hidden}
+.month{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.month .day{min-height:62px;text-align:center;padding:7px 3px}.month .day strong{font-size:16px}.month .day small{display:block}.month .day .dot{display:inline-block;margin:5px 2px 0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:99px;background:#e6ddca;font-size:10px;color:var(--forest)}.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:#f8f2e7;border-radius:99px;padding:8px 12px;font-size:11px;color:var(--forest)}.tabs button.active{background:var(--forest);color:#f5eddd}
+.searchbar{display:flex;gap:8px;margin:10px 0 18px}.searchbar input{flex:1}
+.login-note{font-size:11px!important}.hidden{display:none!important}
+@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@media(max-width:760px){.app{padding:14px 13px 100px}.top{margin-bottom:14px}.brand h1{font-size:24px}.hero{padding:23px 20px;min-height:150px}.span-8,.span-6,.span-4{grid-column:span 12}.week{grid-template-columns:repeat(2,1fr)}.week .day:nth-child(n+7){display:none}.month .day{min-height:48px}.nav{gap:0}.nav button{padding:8px 9px;min-width:0;flex:1}.nav button span:last-child{font-size:9px}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+ <div class="loginbox">
+  <div class="sigil">✧</div><h1>El Grimorio</h1>
+  <p>Un pequeño refugio para ordenar tus días, guardar tus tesoros y no olvidar lo importante.</p>
+  <p id="login-status" class="login-note">Tu sesión se conservará en este dispositivo.</p>
+  <button class="btn primary" id="enterBtn">✦ Entrar</button>
+ </div>
+</div>
+<div class="app" id="app" hidden>
+ <header class="top">
+  <div class="brand"><div class="sigil">✧</div><div><h1>El Grimorio</h1><small>Agenda de un pequeño mundo mágico</small></div></div>
+  <div class="top-actions"><button class="iconbtn" id="searchOpen" aria-label="Buscar">⌕</button><button class="iconbtn" id="quickAdd" aria-label="Crear">＋</button></div>
+ </header>
+ <section class="hero" style="background-image:linear-gradient(110deg,#26372fee,#3c5042eF),url('URL_IMAGEN_CABECERA')">
+  <div class="eyebrow">✧ Tu cuaderno de campo ✧</div><h2 id="greeting">Que la magia acompañe tus pasos.</h2><p id="todayLabel"></p>
+ </section>
+ <main>
+  <section class="view active" id="view-home">
+   <div class="section-head"><div><h2>Tu refugio</h2><p>Un vistazo amable a lo que te espera.</p></div><span class="pill">☘ Hoy</span></div>
+   <div class="grid">
+    <article class="card span-6"><div class="row"><h3>Agenda de hoy</h3><button class="btn small" data-go="agenda">Abrir</button></div><div id="home-events" class="stack"></div></article>
+    <article class="card span-6"><div class="row"><h3>Pequeñas misiones</h3><button class="btn small" data-go="tasks">Ver tareas</button></div><div id="home-tasks" class="stack"></div></article>
+    <article class="card span-4"><h3>Bolsa de monedas</h3><div class="stat" id="home-money">—</div><p id="home-money-sub">Banco y efectivo</p><button class="btn small" data-go="economy">Consultar economía</button></article>
+    <article class="card span-4"><h3>Próximo turno</h3><div id="home-work" class="stack"></div><button class="btn small" data-go="work">Ver trabajo</button></article>
+    <article class="card span-4"><h3>Próximos cumpleaños</h3><div id="home-bdays" class="stack"></div><button class="btn small" data-go="birthdays">Ver bestiario</button></article>
+   </div>
+  </section>
+  <section class="view" id="view-agenda">
+   <div class="section-head"><div><h2>El calendario de los augurios</h2><p>Tus días, encuentros y acontecimientos.</p></div><button class="btn primary" data-create="event">＋ Evento</button></div>
+   <div class="card"><div class="row"><div class="tabs"><button class="active" data-agenda-mode="week">Semana</button><button data-agenda-mode="month">Mes</button></div><div class="row"><button class="btn small" id="calPrev">‹</button><strong id="calLabel" class="hand"></strong><button class="btn small" id="calNext">›</button></div></div><div id="calendar" style="margin-top:15px"></div></div>
+   <div class="section-head"><div><h2 id="dayTitle">Detalle del día</h2><p>Todo lo que sucede en la fecha elegida.</p></div><button class="btn small" data-create="event">＋ Añadir</button></div>
+   <div class="card"><div id="dayEvents" class="stack"></div></div>
+  </section>
+  <section class="view" id="view-tasks">
+   <div class="section-head"><div><h2>Pequeñas misiones</h2><p>Una cosa cada vez. Sin prisa.</p></div><button class="btn primary" data-create="task">＋ Tarea</button></div>
+   <div class="grid">
+    <article class="card span-6"><h3>Para hoy</h3><div id="tasks-today"></div></article>
+    <article class="card span-6"><h3>Ayer</h3><div id="tasks-yesterday"></div></article>
+    <article class="card span-6"><h3>Atrasadas</h3><div id="tasks-overdue"></div></article>
+    <article class="card span-6"><h3>Sin fecha</h3><div id="tasks-undated"></div></article>
+    <article class="card span-12"><h3>Completadas recientemente</h3><div id="tasks-done"></div></article>
+   </div>
+  </section>
+  <section class="view" id="view-economy">
+   <div class="section-head"><div><h2>El tesoro del bosque</h2><p>Una moneda, dos lugares donde guardarla.</p></div><button class="btn primary" data-create="transaction">＋ Movimiento</button></div>
+   <div class="grid">
+    <article class="card span-4"><h3>Banco</h3><div class="stat" id="bankBalance">—</div><button class="btn small" data-create="opening">Saldo inicial</button></article>
+    <article class="card span-4"><h3>Efectivo</h3><div class="stat" id="cashBalance">—</div><button class="btn small" data-create="opening">Saldo inicial</button></article>
+    <article class="card span-4"><h3>Disponible total</h3><div class="stat" id="totalBalance">—</div><p class="tiny">Saldo de ambas ubicaciones.</p></article>
+    <article class="card span-6"><h3>Este mes</h3><div class="row"><span class="muted">Ingresos</span><strong id="monthIncome">—</strong></div><div class="row"><span class="muted">Gastos</span><strong id="monthExpense">—</strong></div><div class="row"><span class="muted">Balance</span><strong id="monthNet">—</strong></div></article>
+    <article class="card span-6"><h3>Movimiento entre bolsillos</h3><p>Pasar dinero del banco al efectivo (o al revés) no cuenta como ingreso ni como gasto.</p><button class="btn" data-create="transfer">⇄ Registrar transferencia</button></article>
+    <article class="card span-12"><div class="row"><h3>Últimos movimientos</h3><button class="btn small" id="balanceBtn">Balance por fechas</button></div><div id="transactionsList"></div></article>
+   </div>
+  </section>
+  <section class="view" id="view-work">
+   <div class="section-head"><div><h2>Libro de encargos</h2><p>Turnos y trabajos previstos.</p></div><button class="btn primary" data-create="work">＋ Turno</button></div>
+   <div class="card"><div id="workList"></div></div>
+  </section>
+  <section class="view" id="view-birthdays">
+   <div class="section-head"><div><h2>Bestiarío de amistades</h2><p>Personas queridas y sus días especiales.</p></div><button class="btn primary" data-create="contact">＋ Cumpleaños</button></div>
+   <div class="card"><div id="birthdayList"></div></div>
+  </section>
+  <section class="view" id="view-settings">
+   <div class="section-head"><div><h2>El rincón de los ajustes</h2><p>Pequeñas preferencias del grimorio.</p></div></div>
+   <div class="grid"><article class="card span-6"><h3>Preferencias</h3><div class="field"><label>Primer día de la semana</label><select id="firstDay"><option value="1">Lunes</option><option value="0">Domingo</option></select></div><button class="btn primary" id="saveSettings">Guardar preferencias</button></article><article class="card span-6"><h3>Copias y sesión</h3><p>Descarga tus datos básicos en formato JSON para conservar una copia.</p><button class="btn" id="exportBtn">⇩ Exportar datos</button><button class="btn danger" id="logoutBtn" style="margin-left:6px">Salir</button></article><article class="card span-12"><h3>Imágenes del grimorio</h3><p class="tiny">En el HTML puedes sustituir URL_IMAGEN_CABECERA por una dirección de imagen propia. También puedes añadir fondos a las tarjetas sin cambiar la lógica.</p></article></div>
+  </section>
+  <section class="view" id="view-search">
+   <div class="section-head"><div><h2>Buscar en el grimorio</h2><p>Encuentra eventos, tareas, turnos, movimientos y contactos.</p></div></div>
+   <div class="searchbar"><input id="globalSearch" placeholder="Escribe una palabra…"><button class="btn primary" id="doSearch">Buscar</button></div><div class="card" id="searchResults"><div class="empty">Escribe algo para comenzar.</div></div>
+  </section>
+ </main>
+</div>
+<nav class="nav" id="nav" hidden>
+ <button class="active" data-go="home"><span class="ico">⌂</span><span>Inicio</span></button>
+ <button data-go="agenda"><span class="ico">☾</span><span>Agenda</span></button>
+ <button data-go="tasks"><span class="ico">✎</span><span>Tareas</span></button>
+ <button data-go="economy"><span class="ico">♧</span><span>Economía</span></button>
+ <button data-go="more"><span class="ico">✧</span><span>Más</span></button>
+</nav>
+<div class="modal-wrap" id="modalWrap"><div class="modal"><div class="row"><h2 id="modalTitle">Nueva entrada</h2><button class="iconbtn" id="modalClose">✕</button></div><form id="entryForm"><div id="formFields"></div><div class="modal-foot"><button type="button" class="btn" id="cancelModal">Cancelar</button><button class="btn primary" type="submit">Guardar</button></div></form></div></div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+/* CONFIGURACIÓN: URL y clave pública de TU proyecto Supabase. Nunca pongas aquí service_role. */
+const SUPABASE_URL = 'https://qykrjqyrjltxyelbybvl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_GX9Uk67nW__qAJke1Qv3zA_4BjT3dF_';
+const USER_EMAIL = 'juanmapuedecontodo@gmail.com';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
+const $ = s => document.querySelector(s);
+const today = () => new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Madrid'});
+const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}) : 'Sin fecha';
+const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(n||0));
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let session=null, profile=null, settings=null, accounts=[], events=[], tasks=[], transactions=[], transfers=[], openings=[], workShifts=[], contacts=[], selectedDate=today(), calDate=new Date(), agendaMode='week', editRecord=null, activeType=null;
+
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
+function showLogin(msg=''){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;if(msg)$('#login-status').textContent=msg}
+function showApp(){ $('#login').style.display='none';$('#app').hidden=false;$('#nav').hidden=false; }
+async function boot(){const {data:{session:s}}=await supabase.auth.getSession();session=s;if(session){showApp();await loadAll()}else showLogin()}
+$('#enterBtn').addEventListener('click',async()=>{const b=$('#enterBtn');b.disabled=true;b.textContent='Enviando acceso…';const {error}=await supabase.auth.signInWithOtp({email:USER_EMAIL,options:{emailRedirectTo:location.href}});b.disabled=false;b.textContent='✦ Entrar';if(error){toast(error.message);$('#login-status').textContent='No se pudo iniciar el acceso: '+error.message}else{$('#login-status').textContent='Te hemos enviado un enlace de acceso a '+USER_EMAIL+'. Ábrelo en este dispositivo.';toast('Revisa tu correo para entrar.')}});
+supabase.auth.onAuthStateChange(async(_event,s)=>{session=s;if(s){showApp();await loadAll()}else showLogin()});
+
+async function getRows(table,order='created_at'){const {data,error}=await supabase.from(table).select('*').order(order,{ascending:false});if(error)throw error;return data||[]}
+async function loadAll(){
+ try{
+  const [p,st,a,e,t,tr,tf,ob,w,c]=await Promise.all([
+   supabase.from('profiles').select('*').maybeSingle(),
+   supabase.from('user_settings').select('*').maybeSingle(),
+   getRows('accounts'),getRows('events','event_date'),getRows('tasks','due_date'),
+   getRows('transactions','transaction_date'),getRows('transfers','transfer_date'),
+   getRows('opening_balances','reference_date'),getRows('work_shifts','shift_date'),getRows('contacts','birth_date')
+  ]);
+  if(p.error||st.error)throw p.error||st.error;
+  profile=p.data;settings=st.data;accounts=a;events=e;tasks=t;transactions=tr;transfers=tf;openings=ob;workShifts=w;contacts=c;
+  $('#firstDay').value=String(settings?.first_day_of_week??1);
+  renderAll();
+ }catch(err){console.error(err);toast('No se pudieron cargar los datos: '+err.message)}
+}
+function renderAll(){renderHome();renderCalendar();renderTasks();renderEconomy();renderWork();renderBirthdays()}
+function go(view){if(view==='more'){view='work'}document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('#view-'+view)?.classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.go===view||(view==='work'&&x.dataset.go==='more')));if(view==='agenda')renderCalendar();window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+$('#nav button[data-go="more"]').addEventListener('click',()=>{const v=prompt('¿A dónde quieres ir?\\n1. Trabajo\\n2. Cumpleaños\\n3. Ajustes','1');go(v==='2'?'birthdays':v==='3'?'settings':'work')});
+$('#searchOpen').onclick=()=>go('search');
+$('#quickAdd').onclick=()=>openForm('event');
+document.querySelectorAll('[data-create]').forEach(b=>b.addEventListener('click',()=>openForm(b.dataset.create)));
+function renderHome(){
+ const now=today();$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ const hour=new Date().getHours();$('#greeting').textContent=hour<12?'Que la magia acompañe tu mañana.':hour<19?'Que la tarde te sea amable.':'Que la noche te traiga calma.';
+ const ev=events.filter(x=>x.event_date===now&&x.status==='active');$('#home-events').innerHTML=ev.length?ev.map(eventLine).join(''):'<div class="empty">No hay eventos para hoy. Un día despejado ✧</div>';
+ const ts=tasks.filter(x=>x.due_date===now&&x.status==='pending');$('#home-tasks').innerHTML=ts.length?ts.map(taskLine).join(''):'<div class="empty">No hay tareas para hoy.</div>';
+ const bank=balance('bank'),cash=balance('cash');$('#home-money').textContent=money(bank+cash);$('#home-money-sub').textContent=`Banco ${money(bank)} · Efectivo ${money(cash)}`;
+ const next=workShifts.filter(x=>x.shift_date>=now&&x.status!=='cancelled').sort((a,b)=>a.shift_date.localeCompare(b.shift_date))[0];$('#home-work').innerHTML=next?`<div class="item"><div class="item-main"><div class="item-title">${esc(next.title)}</div><div class="item-sub">${fmtDate(next.shift_date)} · ${esc(next.start_time||'')}</div></div></div>`:'<div class="empty">Sin turnos próximos.</div>';
+ const bdays=upcomingBirthdays().slice(0,3);$('#home-bdays').innerHTML=bdays.length?bdays.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${esc(x.name)}</div><div class="item-sub">${x.days===0?'¡Hoy!':`En ${x.days} días`} · cumple ${x.age}</div></div></div>`).join(''):'<div class="empty">Todavía no hay cumpleaños.</div>';
+}
+function eventLine(x){return `<div class="item"><span class="dot ${x.importance}"></span><div class="item-main"><div class="item-title">${esc(x.title||'Evento sin título')}</div><div class="item-sub">${x.event_time?x.event_time.slice(0,5):'Hora sin indicar'} · ${esc(x.location_name||'')}</div></div><button class="btn small" data-edit="event" data-id="${x.id}">Editar</button></div>`}
+function taskLine(x){return `<div class="item"><div class="item-main"><div class="item-title hand ${x.status==='completed'?'done':''}">${esc(x.title)}</div><div class="item-sub">${esc(x.details||'')}</div></div><div class="actions"><button class="btn small" data-toggle-task="${x.id}">${x.status==='completed'?'↶':'✓'}</button><button class="btn small" data-edit="task" data-id="${x.id}">✎</button></div></div>`}
+function renderTasks(){const now=today(),yest=new Date(Date.now()-86400000).toLocaleDateString('en-CA',{timeZone:'Europe/Madrid'});const pending=tasks.filter(x=>x.status==='pending');const groups=[['tasks-today',pending.filter(x=>x.due_date===now)],['tasks-yesterday',pending.filter(x=>x.due_date===yest)],['tasks-overdue',pending.filter(x=>x.due_date&&x.due_date<yest)],['tasks-undated',pending.filter(x=>!x.due_date)],['tasks-done',tasks.filter(x=>x.status==='completed').slice(0,20)]];groups.forEach(([id,list])=>$('#'+id).innerHTML=list.length?list.map(taskLine).join(''):'<div class="empty">Nada por aquí.</div>')}
+function balance(type){const ac=accounts.find(a=>a.account_type===type);if(!ac)return 0;const opening=openings.filter(x=>x.account_id===ac.id).reduce((s,x)=>s+Number(x.amount),0);const tx=transactions.filter(x=>x.account_id===ac.id).reduce((s,x)=>s+(x.transaction_type==='income'?1:-1)*Number(x.amount),0);const transferOut=transfers.filter(x=>x.from_account_id===ac.id).reduce((s,x)=>s-Number(x.amount),0);const transferIn=transfers.filter(x=>x.to_account_id===ac.id).reduce((s,x)=>s+Number(x.amount),0);return opening+tx+transferOut+transferIn}
+function renderEconomy(){const b=balance('bank'),c=balance('cash');$('#bankBalance').textContent=money(b);$('#cashBalance').textContent=money(c);$('#totalBalance').textContent=money(b+c);const m=today().slice(0,7),monthTx=transactions.filter(x=>x.transaction_date?.startsWith(m));const inc=monthTx.filter(x=>x.transaction_type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=monthTx.filter(x=>x.transaction_type==='expense').reduce((s,x)=>s+Number(x.amount),0);$('#monthIncome').textContent=money(inc);$('#monthExpense').textContent=money(exp);$('#monthNet').textContent=money(inc-exp);const list=transactions.slice(0,20);$('#transactionsList').innerHTML=list.length?list.map(x=>{const ac=accounts.find(a=>a.id===x.account_id);return `<div class="item"><span class="dot ${x.transaction_type==='income'?'simple':'critical'}"></span><div class="item-main"><div class="item-title">${esc(x.concept)}</div><div class="item-sub">${fmtDate(x.transaction_date)} · ${esc(ac?.name||'Cuenta')} · ${esc(x.category||'Sin categoría')}</div></div><strong>${x.transaction_type==='expense'?'−':'+'}${money(x.amount)}</strong><button class="btn small" data-edit="transaction" data-id="${x.id}">✎</button></div>`}).join(''):'<div class="empty">Todavía no hay movimientos.</div>'}
+function upcomingBirthdays(){const base=new Date(today()+'T12:00:00');return contacts.map(c=>{const birth=new Date(c.birth_date+'T12:00:00');let next=new Date(base.getFullYear(),birth.getMonth(),birth.getDate());if(next<base)next.setFullYear(base.getFullYear()+1);const age=next.getFullYear()-birth.getFullYear();return {...c,days:Math.round((next-base)/86400000),age}}).sort((a,b)=>a.days-b.days)}
+function renderBirthdays(){const list=upcomingBirthdays();$('#birthdayList').innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${esc(x.name)}</div><div class="item-sub">${fmtDate(x.birth_date)} · ${x.days===0?'Hoy':`En ${x.days} días`} · ${x.age} años${x.notes?' · '+esc(x.notes):''}</div></div><button class="btn small" data-edit="contact" data-id="${x.id}">Editar</button><button class="btn small danger" data-delete="contacts" data-id="${x.id}">×</button></div>`).join(''):'<div class="empty">Aún no has añadido cumpleaños.</div>'}
+function renderWork(){const list=[...workShifts].sort((a,b)=>a.shift_date.localeCompare(b.shift_date));$('#workList').innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${esc(x.title)} <span class="pill">${esc(x.status)}</span></div><div class="item-sub">${fmtDate(x.shift_date)} · ${esc(x.start_time||'--:--')}–${esc(x.end_time||'--:--')} · ${esc(x.location_name||'')}</div><div class="item-sub">${esc(x.company_or_client||'')} ${x.expected_pay?`· Previsto ${money(x.expected_pay)}`:''}</div></div><button class="btn small" data-edit="work" data-id="${x.id}">Editar</button><button class="btn small danger" data-delete="work_shifts" data-id="${x.id}">×</button></div>`).join(''):'<div class="empty">No hay turnos registrados.</div>'}
+function startOfWeek(date){const d=new Date(date);const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(12,0,0,0);return d}
+function iso(d){return d.toLocaleDateString('en-CA')}
+function renderCalendar(){const host=$('#calendar');const month=calDate.getMonth(),year=calDate.getFullYear();if(agendaMode==='week'){const start=startOfWeek(calDate);$('#calLabel').textContent=`${start.toLocaleDateString('es-ES',{day:'numeric',month:'short'})} – ${new Date(start.getTime()+6*86400000).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})}`;let days=[];for(let i=0;i<7;i++){let d=new Date(start);d.setDate(start.getDate()+i);let key=iso(d),list=events.filter(e=>e.event_date===key&&e.status==='active');days.push(`<div class="day ${key===selectedDate?'selected':''}" data-day="${key}"><small>${d.toLocaleDateString('es-ES',{weekday:'short'})}</small><strong>${d.getDate()}</strong><div class="mini">${list.slice(0,3).map(e=>`${e.event_time?e.event_time.slice(0,5)+' ':''}${esc(e.title||'Evento')}`).join('<br>')||'·'}</div></div>`)}host.innerHTML=`<div class="week">${days.join('')}</div>`}else{$('#calLabel').textContent=calDate.toLocaleDateString('es-ES',{month:'long',year:'numeric'});let first=new Date(year,month,1),offset=(first.getDay()+6)%7,days=new Date(year,month+1,0).getDate(),cells=[];['L','M','X','J','V','S','D'].forEach(x=>cells.push(`<div class="tiny" style="text-align:center">${x}</div>`));for(let i=0;i<offset;i++)cells.push('<div></div>');for(let n=1;n<=days;n++){let d=new Date(year,month,n),key=iso(d),list=events.filter(e=>e.event_date===key&&e.status==='active'),critical=list.some(e=>e.importance==='critical'),color=critical||list.length>=3?'#b85c57':list.length===2?'#d3a84f':list.length===1?'#779879':'transparent';cells.push(`<div class="day ${key===selectedDate?'selected':''}" data-day="${key}"><strong>${n}</strong><span class="dot" style="background:${color}"></span></div>`)}host.innerHTML=`<div class="month">${cells.join('')}</div>`}renderDay()}
+function renderDay(){const list=events.filter(e=>e.event_date===selectedDate);$('#dayTitle').textContent=fmtDate(selectedDate);$('#dayEvents').innerHTML=list.length?list.map(x=>`${eventLine(x)}<div class="tiny">${esc(x.details||'')}${x.maps_url?` · <a target="_blank" rel="noopener" href="${esc(x.maps_url)}">${esc(x.location_name||'Abrir mapa')}</a>`:''}</div>`).join(''):'<div class="empty">No hay eventos en este día.</div>'}
+$('#calendar').addEventListener('click',e=>{const d=e.target.closest('[data-day]');if(d){selectedDate=d.dataset.day;calDate=new Date(selectedDate+'T12:00:00');renderCalendar()}});
+document.querySelectorAll('[data-agenda-mode]').forEach(b=>b.onclick=()=>{agendaMode=b.dataset.agendaMode;document.querySelectorAll('[data-agenda-mode]').forEach(x=>x.classList.toggle('active',x===b));renderCalendar()});
+$('#calPrev').onclick=()=>{calDate.setDate(calDate.getDate()+(agendaMode==='week'?-7:0));if(agendaMode==='month')calDate.setMonth(calDate.getMonth()-1);renderCalendar()};
+$('#calNext').onclick=()=>{if(agendaMode==='week')calDate.setDate(calDate.getDate()+7);else calDate.setMonth(calDate.getMonth()+1);renderCalendar()};
+
+const fields={
+ event:[['title','Título','text'],['event_date','Fecha','date'],['event_time','Hora','time'],['location_name','Nombre del lugar','text'],['location_address','Dirección','text'],['maps_url','Enlace Google Maps','url'],['details','Detalles','textarea'],['importance','Importancia','select',['simple','medium','critical']],['status','Estado','select',['active','cancelled']]],
+ task:[['title','Tarea','text',null,true],['details','Detalles','textarea'],['due_date','Fecha','date'],['status','Estado','select',['pending','completed']]],
+ transaction:[['transaction_type','Tipo','select',['income','expense'],true],['amount','Importe (€)','number',null,true],['transaction_date','Fecha','date'],['concept','Concepto','text',null,true],['category','Categoría','text'],['account_id','Dónde','account'],['notes','Notas','textarea']],
+ opening:[['account_id','Ubicación','account',null,true],['amount','Saldo (€)','number',null,true],['reference_date','Fecha de referencia','date'],['notes','Notas','textarea']],
+ transfer:[['from_account_id','Desde','account',null,true],['to_account_id','Hasta','account',null,true],['amount','Importe (€)','number',null,true],['transfer_date','Fecha','date'],['concept','Concepto','text'],['notes','Notas','textarea']],
+ work:[['title','Trabajo / evento','text',null,true],['shift_date','Fecha','date',null,true],['start_time','Hora de inicio','time'],['end_time','Hora de fin','time'],['location_name','Lugar','text'],['location_address','Dirección','text'],['maps_url','Enlace Google Maps','url'],['company_or_client','Empresa / cliente','text'],['details','Detalles','textarea'],['expected_pay','Remuneración prevista (€)','number'],['status','Estado','select',['pending','confirmed','cancelled']]],
+ contact:[['name','Nombre','text',null,true],['birth_date','Fecha de nacimiento','date',null,true],['notes','Notas','textarea'],['notification_days_before','Avisar días antes','number']]
+};
+const tableFor={event:'events',task:'tasks',transaction:'transactions',opening:'opening_balances',transfer:'transfers',work:'work_shifts',contact:'contacts'};
+function openForm(type,record=null){activeType=type;editRecord=record;$('#modalTitle').textContent=(record?'Editar ':'Añadir ')+({event:'evento',task:'tarea',transaction:'movimiento',opening:'saldo inicial',transfer:'transferencia',work:'turno',contact:'cumpleaños'}[type]);const f=fields[type];$('#formFields').innerHTML=`<div class="formgrid">${f.map(([name,label,kind,opts,req])=>{let value=record?.[name]??(name==='event_date'||name==='due_date'||name==='shift_date'||name==='transaction_date'||name==='reference_date'||name==='transfer_date'?today():name==='status'?(type==='work'?'pending':type==='task'?'pending':'active'):name==='importance'?'simple':'');let html='';if(kind==='textarea')html=`<textarea name="${name}">${esc(value)}</textarea>`;else if(kind==='select')html=`<select name="${name}">${opts.map(o=>`<option value="${o}" ${value===o?'selected':''}>${({simple:'Sencillo',medium:'Importancia media',critical:'Importantísimo',active:'Activo',cancelled:'Cancelado',pending:'Pendiente',completed:'Completada',confirmed:'Confirmado',income:'Ingreso',expense:'Gasto'})[o]||o}</option>`).join('')}</select>`;else if(kind==='account')html=`<select name="${name}">${accounts.map(a=>`<option value="${a.id}" ${(value===a.id||(!value&&a.account_type===(name==='to_account_id'?'cash':'bank')))?'selected':''}>${esc(a.name)}</option>`).join('')}</select>`;else html=`<input name="${name}" type="${kind}" value="${esc(value)}" ${req?'required':''} ${kind==='number'?'min="0" step="0.01"':''}>`;return `<div class="field ${kind==='textarea'?'wide':''}"><label>${label}${req?' *':''}</label>${html}</div>`}).join('')}</div>`;$('#modalWrap').classList.add('open')}
+function closeModal(){$('#modalWrap').classList.remove('open');$('#entryForm').reset();editRecord=null}
+$('#modalClose').onclick=$('#cancelModal').onclick=closeModal;
+$('#modalWrap').addEventListener('click',e=>{if(e.target===$('#modalWrap'))closeModal()});
+$('#entryForm').onsubmit=async e=>{e.preventDefault();const table=tableFor[activeType],fd=new FormData(e.target),obj={};for(const [k,v] of fd.entries())obj[k]=v===''?null:v;
+ if(['transaction','opening','transfer','work'].includes(activeType)&&obj.amount)obj.amount=Number(obj.amount);if(obj.expected_pay)obj.expected_pay=Number(obj.expected_pay);if(obj.notification_days_before)obj.notification_days_before=Number(obj.notification_days_before);
+ if(activeType==='event'&&obj.maps_url&&!/^https?:\/\//i.test(obj.maps_url)){toast('El enlace del mapa debe comenzar por https://');return}
+ try{let q=editRecord?supabase.from(table).update(obj).eq('id',editRecord.id):supabase.from(table).insert(obj);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast('Guardado en tu grimorio ✧')}catch(err){toast('No se pudo guardar: '+err.message);console.error(err)}
+};
+document.addEventListener('click',async e=>{const ed=e.target.closest('[data-edit]');if(ed){const type=ed.dataset.edit,table=tableFor[type],pool={event:events,task:tasks,transaction:transactions,work:workShifts,contact:contacts}[type];const rec=pool?.find(x=>x.id===ed.dataset.id);if(rec)openForm(type,rec)}
+ const del=e.target.closest('[data-delete]');if(del&&confirm('¿Eliminar este registro?')){const {error}=await supabase.from(del.dataset.delete).delete().eq('id',del.dataset.id);if(error)toast(error.message);else{await loadAll();toast('Registro eliminado')}}
+ const tog=e.target.closest('[data-toggle-task]');if(tog){const x=tasks.find(t=>t.id===tog.dataset.toggleTask),status=x.status==='completed'?'pending':'completed';const {error}=await supabase.from('tasks').update({status,completed_at:status==='completed'?new Date().toISOString():null}).eq('id',x.id);if(error)toast(error.message);else await loadAll()}
+});
+$('#saveSettings').onclick=async()=>{const {error}=await supabase.from('user_settings').update({first_day_of_week:Number($('#firstDay').value)}).eq('user_id',session.user.id);if(error)toast(error.message);else{toast('Preferencias guardadas');await loadAll()}};
+$('#logoutBtn').onclick=async()=>{await supabase.auth.signOut();showLogin('Has cerrado la sesión.')};
+$('#exportBtn').onclick=()=>{const data={exported_at:new Date().toISOString(),events,tasks,transactions,transfers,openings,workShifts,contacts,settings};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='grimorio-copia-'+today()+'.json';a.click();URL.revokeObjectURL(url)};
+$('#balanceBtn').onclick=()=>{const start=prompt('Fecha inicial (AAAA-MM-DD)',today().slice(0,7)+'-01');if(!start)return;const end=prompt('Fecha final (AAAA-MM-DD)',today());if(!end)return;const list=transactions.filter(x=>x.transaction_date>=start&&x.transaction_date<=end);const i=list.filter(x=>x.transaction_type==='income').reduce((s,x)=>s+Number(x.amount),0),o=list.filter(x=>x.transaction_type==='expense').reduce((s,x)=>s+Number(x.amount),0);alert(`Balance ${start} a ${end}\\nIngresos: ${money(i)}\\nGastos: ${money(o)}\\nResultado: ${money(i-o)}`)};
+$('#doSearch').onclick=()=>{const q=$('#globalSearch').value.trim().toLocaleLowerCase('es');if(!q)return;const groups=[['Eventos',events.filter(x=>(x.title||'').toLocaleLowerCase('es').includes(q))],['Tareas',tasks.filter(x=>x.title.toLocaleLowerCase('es').includes(q))],['Trabajo',workShifts.filter(x=>x.title.toLocaleLowerCase('es').includes(q))],['Movimientos',transactions.filter(x=>x.concept.toLocaleLowerCase('es').includes(q))],['Cumpleaños',contacts.filter(x=>x.name.toLocaleLowerCase('es').includes(q))]];$('#searchResults').innerHTML=groups.map(([name,arr])=>`<h3>${name}</h3>${arr.length?arr.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${esc(x.title||x.name||x.concept)}</div><div class="item-sub">${fmtDate(x.event_date||x.due_date||x.shift_date||x.transaction_date||x.birth_date)}</div></div></div>`).join(''):'<p class="tiny">Sin resultados.</p>'}`).join('')};
+boot();
+</script>
+</body>
+</html>
