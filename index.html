@@ -280,61 +280,190 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
    <div class="section-head"><div><h2>Bestiarío de amistades</h2><p>Personas queridas y sus días especiales.</p></div><button class="btn primary" data-create="contact">＋ Cumpleaños</button></div>
    <div class="card"><div id="birthdayList"></div></div>
   </section>
-    <section class="view" id="view-tarot">
-   <div class="section-head">
+
+<section class="view" id="view-tarot">
+  <div class="section-head">
     <div>
-     <h2>El oráculo</h2>
-     <p>Un encuentro con los símbolos y las posibilidades.</p>
+      <h2>El oráculo</h2>
+      <p>Un encuentro con los símbolos y las posibilidades.</p>
     </div>
-   </div>
+  </div>
 
-   <div class="tarot-intro">
-    <div class="tarot-symbol">✧ 🔮 ✧</div>
-    <h3>El Tarot del Grimorio</h3>
-    <p>Piensa una pregunta y baraja el mazo de cartas. Escucha lo que sus símbolos pueden invitarte a explorar.</p>
-   </div>
+  <!-- PORTADA DEL ORÁCULO -->
+  <div id="tarotHome">
 
-   <article class="card">
-    <div class="tarot-question">
-     <label for="tarotQuestion">Tu pregunta (opcional)</label>
-     <textarea id="tarotQuestion" placeholder="¿Qué te gustaría explorar hoy?"></textarea>
-    </div>
-
-    <div class="tarot-controls">
-     <div class="field">
-      <label for="tarotSpread">Tipo de tirada</label>
-      <select id="tarotSpread">
-       <option value="1">Una carta · El momento</option>
-       <option value="3">Tres cartas · Pasado, presente y camino</option>
-       <option value="5">Cinco cartas · Lectura profunda</option>
-      </select>
-     </div>
-     <div class="field">
-      <label>El mazo</label>
-      <div class="pill" style="padding:12px;width:100%;justify-content:center">78 cartas · Rider-Waite</div>
-     </div>
+    <div class="tarot-intro">
+      <div class="tarot-symbol">✧ 🔮 ✧</div>
+      <h3>El Tarot del Grimorio</h3>
+      <p>
+        Un espacio para consultar las cartas, descubrir sus secretos
+        y aprender el lenguaje de los arcanos.
+      </p>
     </div>
 
-    <button class="btn primary tarot-draw" id="tarotDraw">
-     ✧ Barajar el mazo ✧
+    <div class="card" style="margin-bottom:14px">
+      <div style="text-align:center;padding:10px 0">
+        <div style="font-size:38px;margin-bottom:10px">🌙</div>
+        <h3>Consultar el Tarot</h3>
+        <p class="muted">
+          Baraja el mazo y explora los mensajes simbólicos de las cartas.
+        </p>
+        <button class="btn primary" data-tarot-open="consult">
+          ✧ Abrir el oráculo ✧
+        </button>
+      </div>
+    </div>
+
+    <div class="grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+
+      <article class="card" style="text-align:center">
+        <div style="font-size:34px;margin-bottom:8px">📖</div>
+        <h3>El Compendio</h3>
+        <p class="muted">Las 78 cartas y sus significados.</p>
+        <button class="btn" data-tarot-open="compendium">
+          Abrir compendio
+        </button>
+      </article>
+
+      <article class="card" style="text-align:center">
+        <div style="font-size:34px;margin-bottom:8px">🎴</div>
+        <h3>Juega y estudia</h3>
+        <p class="muted">Aprende jugando y pon a prueba tus conocimientos.</p>
+        <button class="btn" data-tarot-open="game">
+          Comenzar a estudiar
+        </button>
+      </article>
+
+    </div>
+
+    <article class="card" style="margin-top:12px;text-align:center">
+      <div style="font-size:34px;margin-bottom:8px">🏆</div>
+      <h3>Registro del aprendiz</h3>
+      <p class="muted">
+        Tus partidas, puntuaciones, récords y evolución.
+      </p>
+      <button class="btn" data-tarot-open="records">
+        Consultar mis progresos
+      </button>
+    </article>
+
+  </div>
+
+  <!-- CONSULTA DEL TAROT -->
+  <div id="tarotPanelConsult" style="display:none">
+
+    <button class="btn" data-tarot-back style="margin-bottom:14px">
+      ← Volver al oráculo
     </button>
 
-    <div class="tarot-deck" id="tarotDeck" aria-hidden="true">
-     <div class="tarot-back">✧</div>
-     <div class="tarot-back">☾</div>
-     <div class="tarot-back">✧</div>
-     <div class="tarot-back">☽</div>
-     <div class="tarot-back">✧</div>
+    <div class="tarot-intro">
+      <div class="tarot-symbol">✧ 🔮 ✧</div>
+      <h3>Consultar el Tarot</h3>
+      <p>
+        Piensa una pregunta y baraja el mazo de cartas.
+        Escucha lo que sus símbolos pueden invitarte a explorar.
+      </p>
     </div>
 
-    <div id="tarotResults" aria-live="polite"></div>
+    <article class="card">
+      <div class="tarot-question">
+        <label for="tarotQuestion">Tu pregunta (opcional)</label>
+        <textarea id="tarotQuestion" placeholder="¿Qué te gustaría explorar hoy?"></textarea>
+      </div>
 
-    <p class="tarot-disclaimer">
-     El Tarot es una herramienta simbólica de reflexión y autoconocimiento.
-     Sus cartas no predicen el futuro ni sustituyen tus propias decisiones.
-    </p>
-   </article>
-  </section>
+      <div class="tarot-controls">
+        <div class="field">
+          <label for="tarotSpread">Tipo de tirada</label>
+          <select id="tarotSpread">
+            <option value="1">Una carta · El momento</option>
+            <option value="3">Tres cartas · Pasado, presente y camino</option>
+            <option value="5">Cinco cartas · Lectura profunda</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>El mazo</label>
+          <div class="pill" style="padding:12px;width:100%;justify-content:center">
+            78 cartas · Rider-Waite
+          </div>
+        </div>
+      </div>
+
+      <button class="btn primary tarot-draw" id="tarotDraw">
+        ✧ Barajar el mazo ✧
+      </button>
+
+      <div class="tarot-deck" id="tarotDeck" aria-hidden="true">
+        <div class="tarot-back">✧</div>
+        <div class="tarot-back">☾</div>
+        <div class="tarot-back">✧</div>
+        <div class="tarot-back">☽</div>
+        <div class="tarot-back">✧</div>
+      </div>
+
+      <div id="tarotResults" aria-live="polite"></div>
+
+      <p class="tarot-disclaimer">
+        El Tarot es una herramienta simbólica de reflexión y autoconocimiento.
+        Sus cartas no predicen el futuro ni sustituyen tus propias decisiones.
+      </p>
+    </article>
+  </div>
+
+  <!-- COMPENDIO -->
+  <div id="tarotPanelCompendium" style="display:none">
+    <button class="btn" data-tarot-back style="margin-bottom:14px">
+      ← Volver al oráculo
+    </button>
+    <div class="tarot-intro">
+      <div class="tarot-symbol">📖 ✧</div>
+      <h3>El Compendio de los Arcanos</h3>
+      <p>Un libro para descubrir y estudiar las 78 cartas del Tarot.</p>
+    </div>
+    <article class="card">
+      <div class="empty">
+        El conocimiento de los arcanos aguarda entre estas páginas.
+        Muy pronto podrás consultar aquí todas las cartas.
+      </div>
+    </article>
+  </div>
+
+  <!-- JUEGO -->
+  <div id="tarotPanelGame" style="display:none">
+    <button class="btn" data-tarot-back style="margin-bottom:14px">
+      ← Volver al oráculo
+    </button>
+    <div class="tarot-intro">
+      <div class="tarot-symbol">🎴 ✧</div>
+      <h3>Juega y estudia</h3>
+      <p>Conviértete en aprendiz de los arcanos y pon a prueba tus conocimientos.</p>
+    </div>
+    <article class="card">
+      <div class="empty">
+        Tu escuela de Tarot está preparándose. Pronto podrás configurar
+        tus sesiones y comenzar a jugar.
+      </div>
+    </article>
+  </div>
+
+  <!-- REGISTRO -->
+  <div id="tarotPanelRecords" style="display:none">
+    <button class="btn" data-tarot-back style="margin-bottom:14px">
+      ← Volver al oráculo
+    </button>
+    <div class="tarot-intro">
+      <div class="tarot-symbol">🏆 ✧</div>
+      <h3>Registro del aprendiz</h3>
+      <p>Un recorrido por tus avances y descubrimientos.</p>
+    </div>
+    <article class="card">
+      <div class="empty">
+        Aquí quedarán guardadas tus sesiones, puntuaciones y récords.
+      </div>
+    </article>
+  </div>
+
+</section>
+
   <section class="view" id="view-settings">
    <div class="section-head"><div><h2>El rincón de los ajustes</h2><p>Pequeñas preferencias del grimorio.</p></div></div>
    <div class="grid"><article class="card span-6"><h3>Preferencias</h3><div class="field"><label>Primer día de la semana</label><select id="firstDay"><option value="1">Lunes</option><option value="0">Domingo</option></select></div><button class="btn primary" id="saveSettings">Guardar preferencias</button></article><article class="card span-6"><h3>Copias y sesión</h3><p>Descarga tus datos básicos en formato JSON para conservar una copia.</p><button class="btn" id="exportBtn">⇩ Exportar datos</button><button class="btn danger" id="logoutBtn" style="margin-left:6px">Salir</button></article><article class="card span-12"><h3>Imágenes del grimorio</h3><p class="tiny">En el HTML puedes sustituir URL_IMAGEN_CABECERA por una dirección de imagen propia. También puedes añadir fondos a las tarjetas sin cambiar la lógica.</p></article></div>
@@ -518,7 +647,49 @@ $('#tarotDraw').addEventListener('click', () => {
       button.textContent = '✧ Barajar de nuevo ✧';
       tarotBusy = false;
     }
+
   }, delay);
+});
+
+/* NAVEGACIÓN DEL ORÁCULO */
+
+const tarotPanels = {
+  consult: 'tarotPanelConsult',
+  compendium: 'tarotPanelCompendium',
+  game: 'tarotPanelGame',
+  records: 'tarotPanelRecords'
+};
+
+function openTarotPanel(panel) {
+  $('#tarotHome').style.display = 'none';
+
+  Object.values(tarotPanels).forEach(id => {
+    $('#' + id).style.display = 'none';
+  });
+
+  const target = tarotPanels[panel];
+
+  if (target) {
+    $('#' + target).style.display = 'block';
+  }
+}
+
+function returnToTarotHome() {
+  Object.values(tarotPanels).forEach(id => {
+    $('#' + id).style.display = 'none';
+  });
+
+  $('#tarotHome').style.display = 'block';
+}
+
+document.querySelectorAll('[data-tarot-open]').forEach(button => {
+  button.addEventListener('click', () => {
+    openTarotPanel(button.dataset.tarotOpen);
+  });
+});
+
+document.querySelectorAll('[data-tarot-back]').forEach(button => {
+  button.addEventListener('click', returnToTarotHome);
 });
 function renderHome(){
  const now=today();$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
