@@ -520,9 +520,9 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 
     <div class="field">
       <label>¿Qué quieres practicar?</label>
-      <label><input type="checkbox" name="tarotGameType" value="keywords" checked> Palabras clave y asociaciones</label>
+ <label><input type="checkbox" disabled> Palabras clave y asociaciones (próximamente)</label>
       <label><input type="checkbox" name="tarotGameType" value="general" checked> Significado general</label>
-      <label><input type="checkbox" name="tarotGameType" value="situations" checked> Interpretación de situaciones</label>
+      <label><input type="checkbox" disabled> Interpretación de situaciones (próximamente)</label>
       <label><input type="checkbox" name="tarotGameType" value="yesno" checked> Orientación de sí o no</label>
       <label><input type="checkbox" name="tarotGameType" value="reversed" checked> Significados invertidos</label>
     </div>
@@ -897,9 +897,334 @@ $('#tarotCardFamily').addEventListener('change', renderTarotCompendium);
 
 renderTarotCompendium();
 
-/* JUEGO — CONFIGURACIÓN DE LA PARTIDA */
+
+/* JUEGO — MOTOR DE PARTIDAS */
 
 let tarotGameConfig = null;
+let tarotGameSession = null;
+
+function shuffleTarotArray(array) {
+  const result = [...array];
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
+}
+
+function buildTarotQuestions(config) {
+  const questions = [];
+  const selectedTypes = config.types;
+  const selectedOrientations = config.orientations;
+
+  config.cards.forEach(card => {
+    const questionModes = [];
+
+    if (selectedTypes.includes('general')) {
+      selectedOrientations.forEach(orientation => {
+        // Evitamos repetir el significado invertido
+        // si también se ha seleccionado el modo específico.
+        if (
+          orientation === 'invertida' &&
+          selectedTypes.includes('reversed')
+        ) return;
+
+        questionModes.push({
+          type: 'general',
+          orientation,
+          field: orientation === 'normal'
+            ? 'meaning'
+            : 'reversedMeaning',
+          prompt: orientation === 'normal'
+            ? `Según el Compendio, ¿qué significado tiene ${card.name} al derecho?`
+            : `Según el Compendio, ¿qué significado tiene ${card.name} invertida?`
+        });
+      });
+    }
+
+    if (selectedTypes.includes('yesno')) {
+      selectedOrientations.forEach(orientation => {
+        questionModes.push({
+          type: 'yesno',
+          orientation,
+          field: orientation === 'normal'
+            ? 'yesNo'
+            : 'reversedYesNo',
+          prompt: `¿Qué orientación de sí o no ofrece ${card.name} ${orientation === 'normal' ? 'al derecho' : 'invertida'}?`
+        });
+      });
+    }
+
+    if (selectedTypes.includes('reversed')) {
+      questionModes.push({
+        type: 'reversed',
+        orientation: 'invertida',
+        field: 'reversedMeaning',
+        prompt: `¿Cuál es el significado invertido de ${card.name}?`
+      });
+    }
+
+    questionModes.forEach(mode => {
+      const correctAnswer = card[mode.field];
+
+      if (!correctAnswer) return;
+
+      const alternatives = [...new Set(
+        config.cards
+          .filter(other => other.id !== card.id)
+          .map(other => other[mode.field])
+          .filter(value => value && value !== correctAnswer)
+      )];
+
+      if (alternatives.length < 3) return;
+
+      const options = shuffleTarotArray([
+        correctAnswer,
+        ...shuffleTarotArray(alternatives).slice(0, 3)
+      ]);
+
+      questions.push({
+        card,
+        type: mode.type,
+        orientation: mode.orientation,
+        prompt: mode.prompt,
+        field: mode.field,
+        correctAnswer,
+        options
+      });
+    });
+  });
+
+  return shuffleTarotArray(questions);
+}
+
+function startTarotGame() {
+  const questionCount = tarotGameConfig.questionCount;
+  const questions = buildTarotQuestions(tarotGameConfig);
+
+  if (!questions.length) {
+    alert('No hay suficientes preguntas para esta configuración.');
+    return;
+  }
+
+  if (questions.length < questionCount) {
+    alert(
+      `Con esta selección puedes jugar hasta ${questions.length} preguntas. ` +
+      `Amplía la selección o reduce el número de preguntas.`
+    );
+    return;
+  }
+
+  tarotGameSession = {
+    questions: questions.slice(0, questionCount),
+    current: 0,
+    score: 0,
+    mistakes: [],
+    answered: false
+  };
+
+  $('#tarotGameSetup').style.display = 'none';
+  $('#tarotGameResults').style.display = 'none';
+  $('#tarotGamePlay').style.display = 'block';
+
+  renderTarotQuestion();
+}
+
+function renderTarotQuestion() {
+  const session = tarotGameSession;
+  const question = session.questions[session.current];
+
+  session.answered = false;
+
+  $('#tarotGamePlay').innerHTML = `
+    <article class="card">
+      <p class="muted">
+        Pregunta ${session.current + 1} de ${session.questions.length}
+      </p>
+
+      <div style="height:7px;background:var(--paper2);border-radius:10px;margin:12px 0 22px;overflow:hidden">
+        <div style="height:100%;width:${((session.current + 1) / session.questions.length) * 100}%;background:var(--gold);border-radius:10px"></div>
+      </div>
+
+      <div style="text-align:center;padding:12px">
+        <div style="font-size:48px;margin-bottom:8px">
+          ${esc(question.card.symbol)}
+        </div>
+
+        <h3>${esc(question.card.name)}</h3>
+
+        <p class="muted">
+          ${question.orientation === 'invertida' ? '🌙 Carta invertida' : '☀️ Carta al derecho'}
+        </p>
+      </div>
+
+      <h3 style="margin:20px 0">
+        ${esc(question.prompt)}
+      </h3>
+
+      <div id="tarotGameOptions" style="display:grid;gap:10px">
+        ${question.options.map((option, index) => `
+          <button
+            type="button"
+            class="btn"
+            data-tarot-answer="${index}"
+            style="text-align:left;white-space:normal;padding:14px"
+          >
+            ${esc(option)}
+          </button>
+        `).join('')}
+      </div>
+
+      <div id="tarotGameFeedback"></div>
+    </article>
+  `;
+
+  $('#tarotGameOptions').addEventListener('click', event => {
+    const button = event.target.closest('[data-tarot-answer]');
+    if (!button || session.answered) return;
+
+    answerTarotQuestion(Number(button.dataset.tarotAnswer));
+  });
+}
+
+function answerTarotQuestion(answerIndex) {
+  const session = tarotGameSession;
+  const question = session.questions[session.current];
+  const selectedAnswer = question.options[answerIndex];
+  const correct = selectedAnswer === question.correctAnswer;
+
+  session.answered = true;
+
+  if (correct) {
+    session.score++;
+  } else {
+    session.mistakes.push(question);
+  }
+
+  document.querySelectorAll('[data-tarot-answer]').forEach((button, index) => {
+    button.disabled = true;
+    button.style.opacity = '1';
+
+    const option = question.options[index];
+
+    if (option === question.correctAnswer) {
+      button.style.border = '2px solid #54845b';
+      button.style.background = '#e2f0df';
+    } else if (index === answerIndex) {
+      button.style.border = '2px solid #b65d5d';
+      button.style.background = '#f5dddd';
+    }
+  });
+
+  const reflection = question.orientation === 'invertida'
+    ? question.card.reversedReflection
+    : question.card.reflection;
+
+  $('#tarotGameFeedback').innerHTML = `
+    <div class="card" style="margin-top:16px">
+      <h3>${correct ? '✨ ¡Correcto!' : '🌙 No exactamente...'}</h3>
+
+      <p><strong>La respuesta del Compendio:</strong></p>
+      <p>${esc(question.correctAnswer)}</p>
+
+      ${reflection ? `
+        <p style="margin-top:12px">
+          <strong>Una reflexión:</strong>
+        </p>
+        <p>${esc(reflection)}</p>
+      ` : ''}
+
+      <button
+        type="button"
+        class="btn primary"
+        id="tarotGameNext"
+        style="width:100%;margin-top:16px"
+      >
+        ${session.current + 1 === session.questions.length
+          ? 'Ver resultados'
+          : 'Siguiente pregunta →'}
+      </button>
+    </div>
+  `;
+
+  $('#tarotGameNext').addEventListener('click', () => {
+    session.current++;
+
+    if (session.current >= session.questions.length) {
+      finishTarotGame();
+    } else {
+      renderTarotQuestion();
+    }
+  });
+}
+
+function finishTarotGame() {
+  const session = tarotGameSession;
+  const total = session.questions.length;
+  const percentage = Math.round((session.score / total) * 100);
+
+  $('#tarotGamePlay').style.display = 'none';
+  $('#tarotGameResults').style.display = 'block';
+
+  $('#tarotGameResults').innerHTML = `
+    <article class="card" style="text-align:center;padding:28px 18px">
+      <div style="font-size:48px">🏆</div>
+      <h3>¡Partida completada!</h3>
+
+      <p class="muted">Tu resultado como aprendiz</p>
+
+      <div style="font-size:42px;font-weight:bold;color:var(--gold);margin:18px 0">
+        ${session.score} / ${total}
+      </div>
+
+      <h2>${percentage}% de aciertos</h2>
+
+      <p style="margin-top:12px">
+        ${percentage === 100
+          ? '¡Dominio extraordinario de los arcanos!'
+          : percentage >= 70
+            ? '¡Muy buen trabajo, aprendiz!'
+            : percentage >= 50
+              ? 'Vas avanzando. Cada carta tiene algo que enseñarte.'
+              : 'Todo aprendizaje comienza con una primera tirada.'}
+      </p>
+    </article>
+
+    ${session.mistakes.length ? `
+      <article class="card" style="margin-top:12px">
+        <h3>📖 Cartas para repasar</h3>
+
+        ${session.mistakes.map(question => `
+          <div style="padding:12px 0;border-bottom:1px solid var(--line)">
+            <strong>${esc(question.card.name)}</strong>
+            <p class="muted">${question.orientation === 'invertida' ? 'Invertida' : 'Al derecho'}</p>
+            <p>${esc(question.correctAnswer)}</p>
+          </div>
+        `).join('')}
+      </article>
+    ` : `
+      <article class="card" style="margin-top:12px">
+        <p>¡No has fallado ninguna pregunta! ✨</p>
+      </article>
+    `}
+
+    <button
+      type="button"
+      class="btn primary"
+      id="tarotGameAgain"
+      style="width:100%;margin-top:14px"
+    >
+      Volver a configurar
+    </button>
+  `;
+
+  $('#tarotGameAgain').addEventListener('click', () => {
+    $('#tarotGameResults').style.display = 'none';
+    $('#tarotGameSetup').style.display = 'block';
+  });
+}
 
 $('#tarotGameStart').addEventListener('click', () => {
   const questionCount = Number($('#tarotGameQuestionCount').value);
@@ -948,14 +1273,9 @@ $('#tarotGameStart').addEventListener('click', () => {
     cards
   };
 
-  alert(
-    `¡Configuración preparada!\n\n` +
-    `${questionCount} preguntas\n` +
-    `${cards.length} cartas disponibles\n` +
-    `${orientations.length} orientaciones seleccionadas\n` +
-    `${types.length} tipos de pregunta`
-  );
+  startTarotGame();
 });
+
 
 function renderHome(){
  const now=today();$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
