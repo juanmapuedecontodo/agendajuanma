@@ -449,6 +449,7 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
     id="tarotCardList"
     style="display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px"
   ></div>
+   <div id="tarotCardDetail" style="display:none"></div>
 </article>
   </div>
 
@@ -731,6 +732,7 @@ function getTarotCardFamily(card) {
   return 'otras';
 }
 
+
 function renderTarotCompendium() {
   const search = $('#tarotCardSearch').value.trim().toLowerCase();
   const family = $('#tarotCardFamily').value;
@@ -747,7 +749,12 @@ function renderTarotCompendium() {
     `${cards.length} ${cards.length === 1 ? 'carta' : 'cartas'}`;
 
   $('#tarotCardList').innerHTML = cards.map(card => `
-    <article class="card" style="text-align:center;padding:14px 8px">
+    <button
+      type="button"
+      class="card"
+      data-tarot-card="${esc(card.id)}"
+      style="text-align:center;padding:14px 8px;cursor:pointer;color:var(--ink);width:100%"
+    >
       <div style="font-size:30px;margin-bottom:8px">
         ${esc(card.symbol)}
       </div>
@@ -757,11 +764,68 @@ function renderTarotCompendium() {
       <strong style="font-size:13px">
         ${esc(card.name)}
       </strong>
-    </article>
+    </button>
   `).join('') || `
     <p class="muted">No se han encontrado cartas con esa búsqueda.</p>
   `;
 }
+
+function openTarotCard(cardId) {
+  const card = TAROT_CARDS.find(item => item.id === cardId);
+  if (!card) return;
+
+  $('#tarotCardList').style.display = 'none';
+  $('#tarotCardDetail').style.display = 'block';
+
+  $('#tarotCardDetail').innerHTML = `
+    <button class="btn" id="tarotDetailBack" style="margin-bottom:15px">
+      ← Volver a las cartas
+    </button>
+
+    <article class="card" style="text-align:center;padding:24px 16px">
+      <div style="font-size:54px;margin-bottom:10px">
+        ${esc(card.symbol)}
+      </div>
+      <p class="muted">
+        ${card.suit ? esc(card.suit) : 'Arcanos mayores'}
+        · ${esc(String(card.number))}
+      </p>
+      <h3 style="font-size:24px;margin-bottom:20px">
+        ${esc(card.name)}
+      </h3>
+    </article>
+
+    <article class="card" style="margin-top:12px">
+      <h3>☀️ Significado al derecho</h3>
+      <p>${esc(card.meaning)}</p>
+      <h4>Una reflexión</h4>
+      <p>${esc(card.reflection)}</p>
+      <h4>Orientación sí / no</h4>
+      <p>${esc(card.yesNo)}</p>
+    </article>
+
+    <article class="card" style="margin-top:12px">
+      <h3>🌙 Significado invertido</h3>
+      <p>${esc(card.reversedMeaning)}</p>
+      <h4>Una reflexión</h4>
+      <p>${esc(card.reversedReflection)}</p>
+      <h4>Orientación sí / no</h4>
+      <p>${esc(card.reversedYesNo)}</p>
+    </article>
+  `;
+
+  $('#tarotDetailBack').addEventListener('click', () => {
+    $('#tarotCardDetail').style.display = 'none';
+    $('#tarotCardList').style.display = 'grid';
+  });
+}
+
+$('#tarotCardList').addEventListener('click', event => {
+  const button = event.target.closest('[data-tarot-card]');
+  if (button) openTarotCard(button.dataset.tarotCard);
+});
+
+
 
 $('#tarotCardSearch').addEventListener('input', renderTarotCompendium);
 $('#tarotCardFamily').addEventListener('change', renderTarotCompendium);
