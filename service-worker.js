@@ -1,10 +1,11 @@
-const CACHE_NAME = "mi-agenda-shell-v1";
+
+const CACHE_NAME = "mi-agenda-shell-v2";
+
 const APP_SHELL = [
   "/",
   "/manifest.json",
   "/icons/icon-192.png",
-  "/icons/icon-512.png",
-  "/icons/apple-touch-icon.png"
+  "/icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -19,7 +20,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
@@ -29,29 +31,32 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Never cache Supabase/API/auth traffic or non-GET requests.
-  if (request.method !== "GET" || url.origin !== self.location.origin) return;
+  if (request.method !== "GET" || url.origin !== self.location.origin) {
+    return;
+  }
 
-  // Navigation: try the latest app, then fall back to the cached shell.
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
+            caches.open(CACHE_NAME)
+              .then((cache) => cache.put("/", copy));
           }
           return response;
         })
-        .catch(async () => (await caches.match("/")) || Response.error())
+        .catch(async () => {
+          return (await caches.match("/")) || Response.error();
+        })
     );
     return;
   }
 
-  // Cache only the small, known PWA shell assets.
   if (APP_SHELL.includes(url.pathname)) {
     event.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request))
+      caches.match(request)
+        .then((cached) => cached || fetch(request))
     );
   }
 });
