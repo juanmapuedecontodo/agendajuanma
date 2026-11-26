@@ -419,12 +419,37 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
       <h3>El Compendio de los Arcanos</h3>
       <p>Un libro para descubrir y estudiar las 78 cartas del Tarot.</p>
     </div>
-    <article class="card">
-      <div class="empty">
-        El conocimiento de los arcanos aguarda entre estas páginas.
-        Muy pronto podrás consultar aquí todas las cartas.
-      </div>
-    </article>
+<article class="card">
+  <div class="field">
+    <label for="tarotCardSearch">Buscar una carta</label>
+    <input
+      type="search"
+      id="tarotCardSearch"
+      placeholder="Ej. La Emperatriz, El Sol..."
+    >
+  </div>
+
+  <div class="field">
+    <label for="tarotCardFamily">Explorar por familia</label>
+    <select id="tarotCardFamily">
+      <option value="todas">Todas las cartas</option>
+      <option value="mayores">Arcanos mayores</option>
+      <option value="bastos">Bastos</option>
+      <option value="copas">Copas</option>
+      <option value="espadas">Espadas</option>
+      <option value="oros">Oros</option>
+    </select>
+  </div>
+
+  <p class="muted" id="tarotCardCount">
+    78 cartas en el compendio
+  </p>
+
+  <div
+    id="tarotCardList"
+    style="display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px"
+  ></div>
+</article>
   </div>
 
   <!-- JUEGO -->
@@ -488,7 +513,7 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 <div class="toast" id="toast"></div>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { drawTarotCards } from './tarot.js';
+import { TAROT_CARDS, drawTarotCards } from './tarot.js';
 /* CONFIGURACIÓN: URL y clave pública de TU proyecto Supabase. Nunca pongas aquí service_role. */
 const SUPABASE_URL = 'https://qykrjqyrjltxyelbybvl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_GX9Uk67nW__qAJke1Qv3zA_4BjT3dF_';
@@ -691,6 +716,57 @@ document.querySelectorAll('[data-tarot-open]').forEach(button => {
 document.querySelectorAll('[data-tarot-back]').forEach(button => {
   button.addEventListener('click', returnToTarotHome);
 });
+/* COMPENDIO — CATÁLOGO DE CARTAS */
+
+function getTarotCardFamily(card) {
+  if (!card.suit) return 'mayores';
+
+  const suit = String(card.suit).toLowerCase();
+
+  if (suit.includes('bast')) return 'bastos';
+  if (suit.includes('cop')) return 'copas';
+  if (suit.includes('esp')) return 'espadas';
+  if (suit.includes('oro')) return 'oros';
+
+  return 'otras';
+}
+
+function renderTarotCompendium() {
+  const search = $('#tarotCardSearch').value.trim().toLowerCase();
+  const family = $('#tarotCardFamily').value;
+
+  const cards = TAROT_CARDS.filter(card => {
+    const matchesSearch = card.name.toLowerCase().includes(search);
+    const matchesFamily =
+      family === 'todas' || getTarotCardFamily(card) === family;
+
+    return matchesSearch && matchesFamily;
+  });
+
+  $('#tarotCardCount').textContent =
+    `${cards.length} ${cards.length === 1 ? 'carta' : 'cartas'}`;
+
+  $('#tarotCardList').innerHTML = cards.map(card => `
+    <article class="card" style="text-align:center;padding:14px 8px">
+      <div style="font-size:30px;margin-bottom:8px">
+        ${esc(card.symbol)}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:5px">
+        ${esc(String(card.number))}
+      </div>
+      <strong style="font-size:13px">
+        ${esc(card.name)}
+      </strong>
+    </article>
+  `).join('') || `
+    <p class="muted">No se han encontrado cartas con esa búsqueda.</p>
+  `;
+}
+
+$('#tarotCardSearch').addEventListener('input', renderTarotCompendium);
+$('#tarotCardFamily').addEventListener('change', renderTarotCompendium);
+
+renderTarotCompendium();
 function renderHome(){
  const now=today();$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const hour=new Date().getHours();$('#greeting').textContent=hour<12?'Que la magia acompañe tu mañana.':hour<19?'Que la tarde te sea amable.':'Que la noche te traiga calma.';
