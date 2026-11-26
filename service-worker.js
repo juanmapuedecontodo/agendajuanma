@@ -1,12 +1,13 @@
 
-const CACHE_NAME = "mi-agenda-shell-v2";
+const CACHE_NAME = "mi-agenda-shell-v3";
 
 const APP_SHELL = [
   "/",
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png",
-  "/apple-touch-icon.png"
+  "/apple-touch-icon.png",
+  "/tarot.js"
 ];
 
 self.addEventListener("install", (event) => {
