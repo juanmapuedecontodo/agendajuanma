@@ -40,6 +40,177 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 @keyframes fade{from{opacity:0}to{opacity:1}}@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 @media(max-width:760px){.app{padding:14px 13px 100px}.top{margin-bottom:14px}.brand h1{font-size:24px}.hero{padding:23px 20px;min-height:150px}.span-8,.span-6,.span-4{grid-column:span 12}.week{grid-template-columns:repeat(7,minmax(105px,1fr))}.month .day{min-height:48px}.nav button{padding:8px 12px}.nav button span:last-child{font-size:9px}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* =====================================================
+   TAROT — EL GRIMORIO
+   ===================================================== */
+
+.tarot-intro{
+  text-align:center;
+  padding:24px 15px 28px;
+  background:linear-gradient(145deg,#501d5b,#68436f);
+  color:#f4ead8;
+  border-radius:22px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+.tarot-intro .tarot-symbol{
+  font-size:35px;
+  margin-bottom:8px;
+}
+.tarot-intro h3{
+  font:600 30px "Cormorant Garamond",serif;
+  color:#f4ead8;
+  margin:0 0 7px;
+}
+.tarot-intro p{
+  color:#e4d8c9;
+  font-size:12px;
+  line-height:1.6;
+  max-width:460px;
+  margin:0 auto;
+}
+.tarot-controls{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:15px;
+}
+.tarot-controls .field{margin:0}
+.tarot-question{margin-bottom:13px}
+.tarot-question textarea{min-height:75px}
+.tarot-draw{
+  width:100%;
+  padding:14px;
+  font-size:14px;
+}
+.tarot-draw:disabled{opacity:.6;cursor:wait}
+.tarot-deck{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  padding:20px 8px;
+  min-height:150px;
+  overflow:hidden;
+}
+.tarot-back{
+  width:76px;
+  height:120px;
+  flex:none;
+  border:2px solid #c3a66e;
+  border-radius:9px;
+  background:
+    repeating-linear-gradient(45deg,transparent 0 5px,#ffffff0c 5px 7px),
+    linear-gradient(145deg,#68436f,#35153e);
+  box-shadow:0 5px 13px #24102f35;
+  display:grid;
+  place-items:center;
+  color:#e5c98e;
+  font-size:30px;
+}
+.tarot-deck.shuffling .tarot-back:nth-child(odd){
+  animation:tarotShuffle .35s ease-in-out infinite alternate;
+}
+.tarot-deck.shuffling .tarot-back:nth-child(even){
+  animation:tarotShuffle .35s ease-in-out infinite alternate-reverse;
+}
+@keyframes tarotShuffle{
+  from{transform:translateY(-5px) rotate(-5deg)}
+  to{transform:translateY(5px) rotate(5deg)}
+}
+.tarot-results{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-top:15px;
+}
+.tarot-result{text-align:center;min-width:0}
+.tarot-position{
+  color:var(--gold);
+  text-transform:uppercase;
+  letter-spacing:.13em;
+  font-size:10px;
+  font-weight:700;
+  margin-bottom:9px;
+}
+.tarot-card{
+  width:min(190px,100%);
+  min-height:285px;
+  margin:0 auto 12px;
+  padding:13px;
+  border:3px double #b99a62;
+  border-radius:12px;
+  background:
+    radial-gradient(circle at center,#fff9ed 0,#eee2ca 75%);
+  box-shadow:0 9px 22px #342f2924;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  color:var(--forest);
+}
+.tarot-card.reversed{transform:rotate(180deg)}
+.tarot-card-number{
+  font:600 17px "Cormorant Garamond",serif;
+  align-self:flex-start;
+}
+.tarot-card-symbol{
+  font-size:66px;
+  line-height:1.2;
+  margin:auto 0;
+}
+.tarot-card-name{
+  font:700 20px "Cormorant Garamond",serif;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.tarot-card.reversed .tarot-card-number,
+.tarot-card.reversed .tarot-card-name,
+.tarot-card.reversed .tarot-card-symbol{
+  transform:rotate(180deg);
+}
+.tarot-orientation{
+  display:inline-block;
+  border-radius:99px;
+  padding:4px 9px;
+  background:#e8deca;
+  color:var(--forest);
+  font-size:10px;
+  margin-bottom:8px;
+}
+.tarot-meaning{
+  text-align:left;
+  background:#f8f2e7;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px;
+  margin-top:8px;
+}
+.tarot-meaning h4{
+  font:600 17px "Cormorant Garamond",serif;
+  color:var(--forest);
+  margin:0 0 5px;
+}
+.tarot-meaning p{
+  font-size:12px;
+  line-height:1.65;
+  margin:0 0 12px;
+}
+.tarot-meaning p:last-child{margin-bottom:0}
+.tarot-disclaimer{
+  text-align:center;
+  font-size:10px;
+  line-height:1.6;
+  color:var(--muted);
+  margin:18px 5px 5px;
+}
+@media(max-width:520px){
+  .tarot-controls{grid-template-columns:1fr}
+  .tarot-card{min-height:260px}
+}
+@media(prefers-reduced-motion:reduce){
+  .tarot-deck.shuffling .tarot-back{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -109,6 +280,61 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
    <div class="section-head"><div><h2>Bestiarío de amistades</h2><p>Personas queridas y sus días especiales.</p></div><button class="btn primary" data-create="contact">＋ Cumpleaños</button></div>
    <div class="card"><div id="birthdayList"></div></div>
   </section>
+    <section class="view" id="view-tarot">
+   <div class="section-head">
+    <div>
+     <h2>El oráculo</h2>
+     <p>Un encuentro con los símbolos y las posibilidades.</p>
+    </div>
+   </div>
+
+   <div class="tarot-intro">
+    <div class="tarot-symbol">✧ 🔮 ✧</div>
+    <h3>El Tarot del Grimorio</h3>
+    <p>Piensa una pregunta y baraja el mazo de cartas. Escucha lo que sus símbolos pueden invitarte a explorar.</p>
+   </div>
+
+   <article class="card">
+    <div class="tarot-question">
+     <label for="tarotQuestion">Tu pregunta (opcional)</label>
+     <textarea id="tarotQuestion" placeholder="¿Qué te gustaría explorar hoy?"></textarea>
+    </div>
+
+    <div class="tarot-controls">
+     <div class="field">
+      <label for="tarotSpread">Tipo de tirada</label>
+      <select id="tarotSpread">
+       <option value="1">Una carta · El momento</option>
+       <option value="3">Tres cartas · Pasado, presente y camino</option>
+       <option value="5">Cinco cartas · Lectura profunda</option>
+      </select>
+     </div>
+     <div class="field">
+      <label>El mazo</label>
+      <div class="pill" style="padding:12px;width:100%;justify-content:center">78 cartas · Rider-Waite</div>
+     </div>
+    </div>
+
+    <button class="btn primary tarot-draw" id="tarotDraw">
+     ✧ Barajar el mazo ✧
+    </button>
+
+    <div class="tarot-deck" id="tarotDeck" aria-hidden="true">
+     <div class="tarot-back">✧</div>
+     <div class="tarot-back">☾</div>
+     <div class="tarot-back">✧</div>
+     <div class="tarot-back">☽</div>
+     <div class="tarot-back">✧</div>
+    </div>
+
+    <div id="tarotResults" aria-live="polite"></div>
+
+    <p class="tarot-disclaimer">
+     El Tarot es una herramienta simbólica de reflexión y autoconocimiento.
+     Sus cartas no predicen el futuro ni sustituyen tus propias decisiones.
+    </p>
+   </article>
+  </section>
   <section class="view" id="view-settings">
    <div class="section-head"><div><h2>El rincón de los ajustes</h2><p>Pequeñas preferencias del grimorio.</p></div></div>
    <div class="grid"><article class="card span-6"><h3>Preferencias</h3><div class="field"><label>Primer día de la semana</label><select id="firstDay"><option value="1">Lunes</option><option value="0">Domingo</option></select></div><button class="btn primary" id="saveSettings">Guardar preferencias</button></article><article class="card span-6"><h3>Copias y sesión</h3><p>Descarga tus datos básicos en formato JSON para conservar una copia.</p><button class="btn" id="exportBtn">⇩ Exportar datos</button><button class="btn danger" id="logoutBtn" style="margin-left:6px">Salir</button></article><article class="card span-12"><h3>Imágenes del grimorio</h3><p class="tiny">En el HTML puedes sustituir URL_IMAGEN_CABECERA por una dirección de imagen propia. También puedes añadir fondos a las tarjetas sin cambiar la lógica.</p></article></div>
@@ -126,13 +352,14 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
  <button data-go="economy"><span class="ico">♧</span><span>Economía</span></button>
  <button data-go="work"><span class="ico">✧</span><span>Trabajo</span></button>
  <button data-go="birthdays"><span class="ico">♡</span><span>Cumples</span></button>
+ <button data-go="tarot"><span class="ico">✧</span><span>Tarot</span></button>
  <button data-go="settings"><span class="ico">⚙</span><span>Ajustes</span></button>
 </nav>
 <div class="modal-wrap" id="modalWrap"><div class="modal"><div class="row"><h2 id="modalTitle">Nueva entrada</h2><button class="iconbtn" id="modalClose">✕</button></div><form id="entryForm"><div id="formFields"></div><div class="modal-foot"><button type="button" class="btn" id="cancelModal">Cancelar</button><button class="btn primary" type="submit">Guardar</button></div></form></div></div>
 <div class="toast" id="toast"></div>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
+import { drawTarotCards } from './tarot.js';
 /* CONFIGURACIÓN: URL y clave pública de TU proyecto Supabase. Nunca pongas aquí service_role. */
 const SUPABASE_URL = 'https://qykrjqyrjltxyelbybvl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_GX9Uk67nW__qAJke1Qv3zA_4BjT3dF_';
@@ -192,6 +419,107 @@ document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=
 $('#searchOpen').onclick=()=>go('search');
 $('#quickAdd').onclick=()=>openForm('event');
 document.querySelectorAll('[data-create]').forEach(b=>b.addEventListener('click',()=>openForm(b.dataset.create)));
+// =====================================================
+// TAROT — LÓGICA DE LAS TIRADAS
+// =====================================================
+
+const tarotPositions = {
+  1: ['La carta del momento'],
+  3: ['Pasado', 'Presente', 'Camino posible'],
+  5: [
+    'La situación',
+    'Lo que influye',
+    'Lo que no estás viendo',
+    'El consejo',
+    'Posible evolución'
+  ]
+};
+
+let tarotBusy = false;
+
+function renderTarotReading(cards) {
+  const host = $('#tarotResults');
+  const question = $('#tarotQuestion').value.trim();
+  const positions = tarotPositions[cards.length];
+
+  host.innerHTML = `
+    ${question ? `
+      <div class="tarot-meaning">
+        <h4>Tu pregunta</h4>
+        <p>${esc(question)}</p>
+      </div>
+    ` : ''}
+    <div class="tarot-results">
+      ${cards.map((card, index) => `
+        <div class="tarot-result">
+          <div class="tarot-position">${esc(positions[index])}</div>
+
+          <div class="tarot-card ${card.reversed ? 'reversed' : ''}">
+            <div class="tarot-card-number">${esc(card.number)}</div>
+            <div class="tarot-card-symbol">${esc(card.symbol)}</div>
+            <div class="tarot-card-name">${esc(card.name)}</div>
+          </div>
+
+          <div class="tarot-orientation">
+            ${card.reversed ? '↻ Carta invertida' : '✧ Carta al derecho'}
+          </div>
+
+          <div class="tarot-meaning">
+            <h4>Significado</h4>
+            <p>${esc(card.meaning)}</p>
+
+            <h4>Reflexión</h4>
+            <p>${esc(card.reflection)}</p>
+
+            <h4>Orientación de sí o no</h4>
+            <p>${esc(card.yesNo)}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+$('#tarotDraw').addEventListener('click', () => {
+  if (tarotBusy) return;
+
+  tarotBusy = true;
+
+  const button = $('#tarotDraw');
+  const deck = $('#tarotDeck');
+  const results = $('#tarotResults');
+  const amount = Number($('#tarotSpread').value);
+
+  button.disabled = true;
+  button.textContent = '✧ Barajando las cartas…';
+  results.innerHTML = '';
+  deck.classList.add('shuffling');
+
+  const reducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches;
+
+  const delay = reducedMotion ? 50 : 900;
+
+  window.setTimeout(() => {
+    try {
+      const cards = drawTarotCards(amount);
+      renderTarotReading(cards);
+    } catch (error) {
+      console.error('Error al realizar la tirada:', error);
+      results.innerHTML = `
+        <div class="empty">
+          No se ha podido realizar la tirada. Inténtalo de nuevo.
+        </div>
+      `;
+    } finally {
+      deck.classList.remove('shuffling');
+      button.disabled = false;
+      button.textContent = '✧ Barajar de nuevo ✧';
+      tarotBusy = false;
+    }
+  }, delay);
+});
 function renderHome(){
  const now=today();$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const hour=new Date().getHours();$('#greeting').textContent=hour<12?'Que la magia acompañe tu mañana.':hour<19?'Que la tarde te sea amable.':'Que la noche te traiga calma.';
