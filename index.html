@@ -453,23 +453,69 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 </article>
   </div>
 
-  <!-- JUEGO -->
-  <div id="tarotPanelGame" style="display:none">
-    <button class="btn" data-tarot-back style="margin-bottom:14px">
-      ← Volver al oráculo
-    </button>
-    <div class="tarot-intro">
-      <div class="tarot-symbol">🎴 ✧</div>
-      <h3>Juega y estudia</h3>
-      <p>Conviértete en aprendiz de los arcanos y pon a prueba tus conocimientos.</p>
-    </div>
-    <article class="card">
-      <div class="empty">
-        Tu escuela de Tarot está preparándose. Pronto podrás configurar
-        tus sesiones y comenzar a jugar.
-      </div>
-    </article>
+ 
+<!-- JUEGO -->
+<div id="tarotPanelGame" style="display:none">
+  <button class="btn" data-tarot-back style="margin-bottom:14px">
+    ← Volver al oráculo
+  </button>
+
+  <div class="tarot-intro">
+    <div class="tarot-symbol">🎴 ✧</div>
+    <h3>Juega y estudia</h3>
+    <p>Conviértete en aprendiz de los arcanos y pon a prueba tus conocimientos.</p>
   </div>
+
+  <article class="card" id="tarotGameSetup">
+    <h3>⚙️ Prepara tu sesión</h3>
+    <p class="muted">
+      Elige cómo quieres estudiar hoy. Puedes cambiar la configuración
+      en cada partida.
+    </p>
+
+    <div class="field">
+      <label for="tarotGameQuestionCount">Número de preguntas</label>
+      <select id="tarotGameQuestionCount">
+        <option value="10">10 preguntas · Sesión breve</option>
+        <option value="20" selected>20 preguntas · Sesión normal</option>
+        <option value="30">30 preguntas · Sesión larga</option>
+        <option value="50">50 preguntas · Gran desafío</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Familias de cartas</label>
+      <p class="muted">Puedes seleccionar varias.</p>
+      <label><input type="checkbox" name="tarotGameFamily" value="mayores" checked> Arcanos mayores</label>
+      <label><input type="checkbox" name="tarotGameFamily" value="bastos" checked> Bastos</label>
+      <label><input type="checkbox" name="tarotGameFamily" value="copas" checked> Copas</label>
+      <label><input type="checkbox" name="tarotGameFamily" value="espadas" checked> Espadas</label>
+      <label><input type="checkbox" name="tarotGameFamily" value="oros" checked> Oros</label>
+    </div>
+
+    <div class="field">
+      <label>Orientación de las cartas</label>
+      <label><input type="checkbox" name="tarotGameOrientation" value="normal" checked> Al derecho</label>
+      <label><input type="checkbox" name="tarotGameOrientation" value="invertida" checked> Invertidas</label>
+    </div>
+
+    <div class="field">
+      <label>¿Qué quieres practicar?</label>
+      <label><input type="checkbox" name="tarotGameType" value="keywords" checked> Palabras clave y asociaciones</label>
+      <label><input type="checkbox" name="tarotGameType" value="general" checked> Significado general</label>
+      <label><input type="checkbox" name="tarotGameType" value="situations" checked> Interpretación de situaciones</label>
+      <label><input type="checkbox" name="tarotGameType" value="yesno" checked> Orientación de sí o no</label>
+      <label><input type="checkbox" name="tarotGameType" value="reversed" checked> Significados invertidos</label>
+    </div>
+
+    <button class="btn primary" id="tarotGameStart" style="width:100%">
+      ✧ Comenzar la partida ✧
+    </button>
+  </article>
+
+  <div id="tarotGamePlay" style="display:none"></div>
+  <div id="tarotGameResults" style="display:none"></div>
+</div>
 
   <!-- REGISTRO -->
   <div id="tarotPanelRecords" style="display:none">
@@ -831,6 +877,67 @@ $('#tarotCardSearch').addEventListener('input', renderTarotCompendium);
 $('#tarotCardFamily').addEventListener('change', renderTarotCompendium);
 
 renderTarotCompendium();
+
+/* JUEGO — CONFIGURACIÓN DE LA PARTIDA */
+
+let tarotGameConfig = null;
+
+$('#tarotGameStart').addEventListener('click', () => {
+  const questionCount = Number($('#tarotGameQuestionCount').value);
+
+  const families = Array.from(
+    document.querySelectorAll('input[name="tarotGameFamily"]:checked')
+  ).map(input => input.value);
+
+  const orientations = Array.from(
+    document.querySelectorAll('input[name="tarotGameOrientation"]:checked')
+  ).map(input => input.value);
+
+  const types = Array.from(
+    document.querySelectorAll('input[name="tarotGameType"]:checked')
+  ).map(input => input.value);
+
+  if (!families.length) {
+    alert('Selecciona al menos una familia de cartas.');
+    return;
+  }
+
+  if (!orientations.length) {
+    alert('Selecciona al menos una orientación.');
+    return;
+  }
+
+  if (!types.length) {
+    alert('Selecciona al menos un tipo de pregunta.');
+    return;
+  }
+
+  const cards = TAROT_CARDS.filter(card =>
+    families.includes(getTarotCardFamily(card))
+  );
+
+  if (!cards.length) {
+    alert('No hay cartas disponibles con esta configuración.');
+    return;
+  }
+
+  tarotGameConfig = {
+    questionCount,
+    families,
+    orientations,
+    types,
+    cards
+  };
+
+  alert(
+    `¡Configuración preparada!\n\n` +
+    `${questionCount} preguntas\n` +
+    `${cards.length} cartas disponibles\n` +
+    `${orientations.length} orientaciones seleccionadas\n` +
+    `${types.length} tipos de pregunta`
+  );
+});
+
 function renderHome(){
  const now=today();$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const hour=new Date().getHours();$('#greeting').textContent=hour<12?'Que la magia acompañe tu mañana.':hour<19?'Que la tarde te sea amable.':'Que la noche te traiga calma.';
