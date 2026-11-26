@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#26372f">
 <meta name="description" content="Mi grimorio personal: agenda, tareas, economía y trabajo.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Agenda">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>El Grimorio — Mi agenda personal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,6 +225,21 @@ $('#exportBtn').onclick=()=>{const data={exported_at:new Date().toISOString(),ev
 $('#balanceBtn').onclick=()=>{const start=prompt('Fecha inicial (AAAA-MM-DD)',today().slice(0,7)+'-01');if(!start)return;const end=prompt('Fecha final (AAAA-MM-DD)',today());if(!end)return;const list=transactions.filter(x=>x.transaction_date>=start&&x.transaction_date<=end);const i=list.filter(x=>x.transaction_type==='income').reduce((s,x)=>s+Number(x.amount),0),o=list.filter(x=>x.transaction_type==='expense').reduce((s,x)=>s+Number(x.amount),0);alert(`Balance ${start} a ${end}\\nIngresos: ${money(i)}\\nGastos: ${money(o)}\\nResultado: ${money(i-o)}`)};
 $('#doSearch').onclick=()=>{const q=$('#globalSearch').value.trim().toLocaleLowerCase('es');if(!q)return;const groups=[['Eventos',events.filter(x=>(x.title||'').toLocaleLowerCase('es').includes(q))],['Tareas',tasks.filter(x=>x.title.toLocaleLowerCase('es').includes(q))],['Trabajo',workShifts.filter(x=>x.title.toLocaleLowerCase('es').includes(q))],['Movimientos',transactions.filter(x=>x.concept.toLocaleLowerCase('es').includes(q))],['Cumpleaños',contacts.filter(x=>x.name.toLocaleLowerCase('es').includes(q))]];$('#searchResults').innerHTML=groups.map(([name,arr])=>`<h3>${name}</h3>${arr.length?arr.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${esc(x.title||x.name||x.concept)}</div><div class="item-sub">${fmtDate(x.event_date||x.due_date||x.shift_date||x.transaction_date||x.birth_date)}</div></div></div>`).join(''):'<p class="tiny">Sin resultados.</p>'}`).join('')};
 boot();
+</script>
+
+<!-- Registro de la aplicación PWA -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+      .then(registration => {
+        console.info('Mi Agenda: service worker registrado.', registration.scope);
+      })
+      .catch(error => {
+        console.error('Mi Agenda: error al registrar el service worker.', error);
+      });
+  });
+}
 </script>
 </body>
 </html>
