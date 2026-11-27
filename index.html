@@ -53,6 +53,7 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:99px;background:#e6ddca;font-size:10px;color:var(--forest)}.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:#f8f2e7;border-radius:99px;padding:8px 12px;font-size:11px;color:var(--forest)}.tabs button.active{background:var(--forest);color:#f5eddd}
 .searchbar{display:flex;gap:8px;margin:10px 0 18px}.searchbar input{flex:1}
 .login-note{font-size:11px!important}.hidden{display:none!important}
+#recoveryForm{display:none;text-align:left;margin-top:18px}#recoveryForm label{display:block;font-size:13px;margin:12px 0 6px;color:var(--forest)}#recoveryForm input{width:100%;padding:13px;border:1px solid #c9b9c9;border-radius:12px;background:#fffdf8;color:#35243a;font:inherit}#recoveryForm .btn{width:100%;margin-top:14px}
 @keyframes fade{from{opacity:0}to{opacity:1}}@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 @media(max-width:760px){.app{padding:14px 13px 100px}.top{margin-bottom:14px}.brand h1{font-size:24px}.hero{padding:23px 20px;min-height:150px}.span-8,.span-6,.span-4{grid-column:span 12}.week{grid-template-columns:repeat(7,minmax(105px,1fr))}.month .day{min-height:48px}.nav button{padding:8px 12px}.nav button span:last-child{font-size:9px}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
@@ -257,6 +258,14 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
    <label for="loginPassword" style="text-align:left;margin-top:18px">Introduce tu contraseña para acceder a tu libro encantado</label>
    <input id="loginPassword" type="password" autocomplete="current-password" required minlength="12" placeholder="Tu clave secreta" aria-label="Contraseña">
    <button class="btn primary" id="enterBtn" type="submit">✦ Abrir mi grimorio</button>
+  </form>
+  <form id="recoveryForm">
+   <p>El enlace de recuperación ha funcionado. Elige ahora una contraseña nueva para tu grimorio.</p>
+   <label for="newPassword">Nueva contraseña (mínimo 12 caracteres)</label>
+   <input id="newPassword" type="password" autocomplete="new-password" required minlength="12" placeholder="Escribe tu nueva contraseña">
+   <label for="confirmPassword">Repite la nueva contraseña</label>
+   <input id="confirmPassword" type="password" autocomplete="new-password" required minlength="12" placeholder="Vuelve a escribirla">
+   <button class="btn primary" id="saveNewPassword" type="submit">✦ Guardar nueva contraseña</button>
   </form>
   <p id="login-status" class="login-note">Tu sesión se conservará en este dispositivo.</p>
  </div>
@@ -705,7 +714,8 @@ const fairyModule = initFairy({ supabase, getUserId: () => session?.user?.id });
 const grimoireModule = initGrimoire({ supabase, getUserId: () => session?.user?.id, toast });
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
-function showLogin(msg=''){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;if(msg)$('#login-status').textContent=msg}
+function showLogin(msg=''){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;$('#loginForm').style.display='block';$('#recoveryForm').style.display='none';if(msg)$('#login-status').textContent=msg}
+function showPasswordRecovery(){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;$('#loginForm').style.display='none';$('#recoveryForm').style.display='block';$('#login-status').textContent='Estás recuperando el acceso. Escribe y confirma tu nueva contraseña.'; }
 function showApp(){ $('#login').style.display='none';$('#app').hidden=false;$('#nav').hidden=false; }
 async function boot(){const {data:{session:s}}=await supabase.auth.getSession();session=s;if(session){showApp();await loadAll()}else showLogin()}
 $('#loginForm').addEventListener('submit',async(event)=>{
@@ -725,7 +735,26 @@ $('#loginForm').addEventListener('submit',async(event)=>{
   $('#login-status').textContent='¡Bienvenido de nuevo!';
  }
 });
-supabase.auth.onAuthStateChange(async(_event,s)=>{session=s;if(s){showApp();await loadAll()}else showLogin()});
+supabase.auth.onAuthStateChange((event,s)=>{
+ session=s;
+ if(event==='PASSWORD_RECOVERY'){showPasswordRecovery();return;}
+ if(s){showApp();queueMicrotask(()=>loadAll())}else showLogin();
+});
+$('#recoveryForm').addEventListener('submit',async(event)=>{
+ event.preventDefault();
+ const password=$('#newPassword').value, confirmation=$('#confirmPassword').value, button=$('#saveNewPassword');
+ if(password.length<12){$('#login-status').textContent='La contraseña debe tener al menos 12 caracteres.';return;}
+ if(password!==confirmation){$('#login-status').textContent='Las dos contraseñas no coinciden. Vuelve a comprobarlas.';$('#confirmPassword').focus();return;}
+ button.disabled=true;button.textContent='Guardando…';$('#login-status').textContent='Actualizando tu contraseña…';
+ const {error}=await supabase.auth.updateUser({password});
+ button.disabled=false;button.textContent='✦ Guardar nueva contraseña';
+ if(error){$('#login-status').textContent='No se ha podido actualizar la contraseña: '+error.message;return;}
+ $('#newPassword').value='';$('#confirmPassword').value='';
+ $('#login-status').textContent='¡Contraseña actualizada! Abriendo tu grimorio…';
+ const {data:{session:currentSession}}=await supabase.auth.getSession();
+ session=currentSession;
+ if(currentSession){showApp();await loadAll()}else showLogin('Contraseña actualizada. Ya puedes entrar con tu nueva clave.');
+});
 
 async function getRows(table,order='created_at'){const {data,error}=await supabase.from(table).select('*').order(order,{ascending:false});if(error)throw error;return data||[]}
 async function loadAll(){
