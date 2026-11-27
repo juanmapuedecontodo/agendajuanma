@@ -292,6 +292,8 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
     <article class="card span-6"><h3>Atrasadas</h3><div id="tasks-overdue"></div></article>
     <article class="card span-6"><h3>Sin fecha</h3><div id="tasks-undated"></div></article>
     <article class="card span-12"><h3>Completadas recientemente</h3><div id="tasks-done"></div></article>
+    <article class="card span-12"><h3>Mañana</h3><div id="tasks-tomorrow"></div></article>
+    <article class="card span-12"><h3>✧ Para adelantar</h3><p class="tiny">Tareas de los próximos días que puedes hacer antes si te apetece.</p><div id="tasks-ahead"></div></article>
    </div>
   </section>
   <section class="view" id="view-economy">
@@ -1695,7 +1697,26 @@ function renderHome(){
 }
 function eventLine(x){return `<div class="item"><span class="dot ${x.importance}"></span><div class="item-main"><div class="item-title">${esc(x.title||'Evento sin título')}</div><div class="item-sub">${x.event_time?x.event_time.slice(0,5):'Hora sin indicar'} · ${esc(x.location_name||'')}</div></div><button class="btn small" data-edit="event" data-id="${x.id}">Editar</button></div>`}
 function taskLine(x){return `<div class="item"><div class="item-main"><div class="item-title hand ${x.status==='completed'?'done':''}">${esc(x.title)}</div><div class="item-sub">${esc(x.details||'')}</div></div><div class="actions"><button class="btn small" data-toggle-task="${x.id}">${x.status==='completed'?'↶':'✓'}</button><button class="btn small" data-edit="task" data-id="${x.id}">✎</button></div></div>`}
-function renderTasks(){const now=today(),yest=new Date(Date.now()-86400000).toLocaleDateString('en-CA',{timeZone:'Europe/Madrid'});const pending=tasks.filter(x=>x.status==='pending');const groups=[['tasks-today',pending.filter(x=>x.due_date===now)],['tasks-yesterday',pending.filter(x=>x.due_date===yest)],['tasks-overdue',pending.filter(x=>x.due_date&&x.due_date<yest)],['tasks-undated',pending.filter(x=>!x.due_date)],['tasks-done',tasks.filter(x=>x.status==='completed').slice(0,20)]];groups.forEach(([id,list])=>$('#'+id).innerHTML=list.length?list.map(taskLine).join(''):'<div class="empty">Nada por aquí.</div>')}
+function renderTasks(){
+ const now=today();
+ const dateAtOffset=offset=>{const d=new Date(now+'T12:00:00');d.setDate(d.getDate()+offset);return d.toLocaleDateString('en-CA')};
+ const yest=dateAtOffset(-1),tomorrow=dateAtOffset(1);
+ const pending=tasks.filter(x=>x.status==='pending');
+ const todayTasks=pending.filter(x=>x.due_date===now);
+ const yesterdayTasks=pending.filter(x=>x.due_date===yest);
+ const overdueTasks=pending.filter(x=>x.due_date&&x.due_date<yest);
+ const undatedTasks=pending.filter(x=>!x.due_date);
+ const doneTasks=tasks.filter(x=>x.status==='completed').slice(0,20);
+ const tomorrowTasks=pending.filter(x=>x.due_date===tomorrow);
+ const aheadTasks=pending.filter(x=>x.due_date&&x.due_date>tomorrow).sort((a,b)=>a.due_date.localeCompare(b.due_date));
+ const groups=[
+  ['tasks-today',todayTasks],['tasks-yesterday',yesterdayTasks],
+  ['tasks-overdue',overdueTasks],['tasks-undated',undatedTasks],
+  ['tasks-done',doneTasks],['tasks-tomorrow',tomorrowTasks]
+ ];
+ groups.forEach(([id,list])=>$('#'+id).innerHTML=list.length?list.map(taskLine).join(''):'<div class="empty">Nada por aquí.</div>');
+ $('#tasks-ahead').innerHTML=aheadTasks.length?aheadTasks.map(x=>taskLine({...x,details:`${fmtDate(x.due_date)}${x.details?' · '+x.details:''}`})).join(''):'<div class="empty">No hay tareas futuras pendientes por ahora.</div>';
+}
 function balance(type){const ac=accounts.find(a=>a.account_type===type);if(!ac)return 0;const opening=openings.filter(x=>x.account_id===ac.id).reduce((s,x)=>s+Number(x.amount),0);const tx=transactions.filter(x=>x.account_id===ac.id).reduce((s,x)=>s+(x.transaction_type==='income'?1:-1)*Number(x.amount),0);const transferOut=transfers.filter(x=>x.from_account_id===ac.id).reduce((s,x)=>s-Number(x.amount),0);const transferIn=transfers.filter(x=>x.to_account_id===ac.id).reduce((s,x)=>s+Number(x.amount),0);return opening+tx+transferOut+transferIn}
 function renderEconomy(){const b=balance('bank'),c=balance('cash');$('#bankBalance').textContent=money(b);$('#cashBalance').textContent=money(c);$('#totalBalance').textContent=money(b+c);const m=today().slice(0,7),monthTx=transactions.filter(x=>x.transaction_date?.startsWith(m));const inc=monthTx.filter(x=>x.transaction_type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=monthTx.filter(x=>x.transaction_type==='expense').reduce((s,x)=>s+Number(x.amount),0);$('#monthIncome').textContent=money(inc);$('#monthExpense').textContent=money(exp);$('#monthNet').textContent=money(inc-exp);const list=transactions.slice(0,20);$('#transactionsList').innerHTML=list.length?list.map(x=>{const ac=accounts.find(a=>a.id===x.account_id);return `<div class="item"><span class="dot ${x.transaction_type==='income'?'simple':'critical'}"></span><div class="item-main"><div class="item-title">${esc(x.concept)}</div><div class="item-sub">${fmtDate(x.transaction_date)} · ${esc(ac?.name||'Cuenta')} · ${esc(x.category||'Sin categoría')}</div></div><strong>${x.transaction_type==='expense'?'−':'+'}${money(x.amount)}</strong><button class="btn small" data-edit="transaction" data-id="${x.id}">✎</button></div>`}).join(''):'<div class="empty">Todavía no hay movimientos.</div>'}
 function upcomingBirthdays(){const base=new Date(today()+'T12:00:00');return contacts.map(c=>{const birth=new Date(c.birth_date+'T12:00:00');let next=new Date(base.getFullYear(),birth.getMonth(),birth.getDate());if(next<base)next.setFullYear(base.getFullYear()+1);const age=next.getFullYear()-birth.getFullYear();return {...c,days:Math.round((next-base)/86400000),age}}).sort((a,b)=>a.days-b.days)}
