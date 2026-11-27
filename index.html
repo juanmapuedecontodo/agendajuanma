@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./fairy.css">
 <style>
 :root{--forest:#501d5b;--forest2:#68436f;--moss:#8a6591;--sage:#b9a1bd;--paper:#f1eadb;--paper2:#e8deca;--ink:#342f29;--muted:#827968;--gold:#b99a62;--plum:#59445e;--rose:#b77d78;--line:rgba(76,65,49,.16);--shadow:0 14px 40px rgba(43,39,30,.12);--radius:20px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#e6ddc9 0,transparent 42%),linear-gradient(135deg,#e9e0ce,#f4eddf 60%,#e7decd);color:var(--ink);font-family:"DM Sans",sans-serif;min-height:100vh}
@@ -316,7 +317,54 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
    <div class="card"><div id="birthdayList"></div></div>
   </section>
 
-<section class="view" id="view-tarot">
+
+  <section class="view" id="view-fairy">
+    <div class="section-head">
+      <div>
+        <h2>El rincón del Hada</h2>
+        <p>Un poquito de magia, una idea inesperada y pequeños detalles para descubrir.</p>
+      </div>
+    </div>
+
+    <div class="fairy-scene">
+      <div class="fairy-scene-sparkle fairy-sparkle-one">✧</div>
+      <div class="fairy-scene-sparkle fairy-sparkle-two">✦</div>
+      <div class="fairy-character-wrap">
+        <img id="fairyImage" class="fairy-character" src="https://i.postimg.cc/sfw0dK66/estandar-1.png" loading="eager" decoding="async"
+             alt="Tu hada, compañera de la Mansión">
+      </div>
+      <div id="fairyBubble" class="fairy-bubble" role="status" aria-live="polite">
+        ¡Hola, Juanma! ¿Cómo estás hoy? Me alegra verte por aquí.
+      </div>
+      <p id="fairyStatus" class="fairy-status">Tu pequeña compañera de la Mansión.</p>
+    </div>
+
+    <div class="fairy-actions-grid">
+      <button class="fairy-action" id="fairyFood" type="button">
+        <span class="fairy-action-icon">🍓</span>
+        <span class="fairy-action-title">Darle de comer</span>
+        <span class="fairy-action-subtitle">¡Una merienda para el hada!</span>
+      </button>
+      <button class="fairy-action" id="fairyInspiration" type="button">
+        <span class="fairy-action-icon">✒️</span>
+        <span class="fairy-action-title">Pedir inspiración</span>
+        <span class="fairy-action-subtitle">Una idea secreta para escribir</span>
+      </button>
+      <button class="fairy-action" id="fairyWhereabouts" type="button">
+        <span class="fairy-action-icon">🪶</span>
+        <span class="fairy-action-title">¿Dónde estarás hoy?</span>
+        <span class="fairy-action-subtitle">Una pequeña señal para descubrir</span>
+      </button>
+      <button class="fairy-action" id="fairyCuriosity" type="button">
+        <span class="fairy-action-icon">📚</span>
+        <span class="fairy-action-title">Dime una curiosidad</span>
+        <span class="fairy-action-subtitle">Un dato de mi colección secreta</span>
+      </button>
+    </div>
+    <p class="fairy-footnote">Las señales y curiosidades son un pequeño regalo diario. Las ideas de escritura no se repiten hasta que hayas descubierto toda la colección.</p>
+  </section>
+
+  <section class="view" id="view-tarot">
   <div class="section-head">
     <div>
       <h2>El oráculo</h2>
@@ -622,6 +670,7 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
  <button data-go="economy"><span class="ico">♧</span><span>Economía</span></button>
  <button data-go="work"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/></svg></span><span>Trabajo</span></button>
  <button data-go="birthdays"><span class="ico">♡</span><span>Cumples</span></button>
+ <button data-go="fairy"><span class="ico">✧</span><span>Hada</span></button>
  <button data-go="tarot"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M9 14c1.5-1 4.5-1 6 0M12 8v2"/></svg></span><span>Tarot</span></button>
  <button data-go="settings"><span class="ico">⚙</span><span>Ajustes</span></button>
 </nav>
@@ -631,6 +680,7 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { TAROT_CARDS, drawTarotCards } from './tarot.js';
 import { TAROT_STUDY } from './tarot-study.js';
+import { initFairy } from './fairy.js';
 /* CONFIGURACIÓN: URL y clave pública de TU proyecto Supabase. Nunca pongas aquí service_role. */
 const SUPABASE_URL = 'https://qykrjqyrjltxyelbybvl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_GX9Uk67nW__qAJke1Qv3zA_4BjT3dF_';
@@ -644,6 +694,7 @@ const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('es-ES',{day
 const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(n||0));
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let session=null, profile=null, settings=null, accounts=[], events=[], tasks=[], transactions=[], transfers=[], openings=[], workShifts=[], contacts=[], selectedDate=today(), calDate=new Date(), agendaMode='week', editRecord=null, activeType=null;
+const fairyModule = initFairy({ supabase, getUserId: () => session?.user?.id });
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
 function showLogin(msg=''){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;if(msg)$('#login-status').textContent=msg}
