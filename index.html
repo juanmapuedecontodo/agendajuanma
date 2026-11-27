@@ -710,14 +710,27 @@ const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('es-ES',{day
 const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(n||0));
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let session=null, profile=null, settings=null, accounts=[], events=[], tasks=[], transactions=[], transfers=[], openings=[], workShifts=[], contacts=[], selectedDate=today(), calDate=new Date(), agendaMode='week', editRecord=null, activeType=null;
+// Supabase puede emitir PASSWORD_RECOVERY y después otro evento de sesión.
+// Mientras dure la recuperación, ningún evento debe cerrar el formulario de nueva contraseña.
+const recoveryHashParams = new URLSearchParams(location.hash.startsWith('#') ? location.hash.slice(1) : location.hash);
+const recoveryQueryParams = new URLSearchParams(location.search);
+let isPasswordRecovery = recoveryHashParams.get('type') === 'recovery' || recoveryQueryParams.get('type') === 'recovery';
 const fairyModule = initFairy({ supabase, getUserId: () => session?.user?.id });
 const grimoireModule = initGrimoire({ supabase, getUserId: () => session?.user?.id, toast });
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
-function showLogin(msg=''){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;$('#loginForm').style.display='block';$('#recoveryForm').style.display='none';if(msg)$('#login-status').textContent=msg}
-function showPasswordRecovery(){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;$('#loginForm').style.display='none';$('#recoveryForm').style.display='block';$('#login-status').textContent='Estás recuperando el acceso. Escribe y confirma tu nueva contraseña.'; }
+function showLogin(msg=''){ isPasswordRecovery=false; $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;$('#loginForm').style.display='block';$('#recoveryForm').style.display='none';if(msg)$('#login-status').textContent=msg}
+function showPasswordRecovery(msg='Estás recuperando el acceso. Escribe y confirma tu nueva contraseña.'){ isPasswordRecovery=true; $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;$('#loginForm').style.display='none';$('#recoveryForm').style.display='block';$('#login-status').textContent=msg; }
 function showApp(){ $('#login').style.display='none';$('#app').hidden=false;$('#nav').hidden=false; }
-async function boot(){const {data:{session:s}}=await supabase.auth.getSession();session=s;if(session){showApp();await loadAll()}else showLogin()}
+async function boot(){
+ if(isPasswordRecovery) showPasswordRecovery();
+ const {data:{session:s}}=await supabase.auth.getSession();session=s;
+ if(isPasswordRecovery){
+  showPasswordRecovery(s ? undefined : 'El enlace se ha abierto, pero todavía no hay una sesión de recuperación válida. Solicita un correo nuevo y abre el enlace más reciente.');
+  return;
+ }
+ if(session){showApp();await loadAll()}else showLogin()
+}
 $('#loginForm').addEventListener('submit',async(event)=>{
  event.preventDefault();
  const b=$('#enterBtn'), password=$('#loginPassword').value;
@@ -737,7 +750,15 @@ $('#loginForm').addEventListener('submit',async(event)=>{
 });
 supabase.auth.onAuthStateChange((event,s)=>{
  session=s;
- if(event==='PASSWORD_RECOVERY'){showPasswordRecovery();return;}
+ if(event==='PASSWORD_RECOVERY'){
+  showPasswordRecovery();
+  return;
+ }
+ // No permitir que SIGNED_IN/INITIAL_SESSION oculte el formulario de recuperación.
+ if(isPasswordRecovery){
+  showPasswordRecovery(s ? 'Enlace de recuperación validado. Elige tu nueva contraseña.' : 'Esperando la sesión de recuperación. Si no aparece el formulario correctamente, solicita un enlace nuevo.');
+  return;
+ }
  if(s){showApp();queueMicrotask(()=>loadAll())}else showLogin();
 });
 $('#recoveryForm').addEventListener('submit',async(event)=>{
@@ -751,6 +772,9 @@ $('#recoveryForm').addEventListener('submit',async(event)=>{
  if(error){$('#login-status').textContent='No se ha podido actualizar la contraseña: '+error.message;return;}
  $('#newPassword').value='';$('#confirmPassword').value='';
  $('#login-status').textContent='¡Contraseña actualizada! Abriendo tu grimorio…';
+ isPasswordRecovery=false;
+ // Limpiar los parámetros de recuperación de la barra de direcciones tras guardar.
+ history.replaceState(null, document.title, location.pathname + location.search);
  const {data:{session:currentSession}}=await supabase.auth.getSession();
  session=currentSession;
  if(currentSession){showApp();await loadAll()}else showLogin('Contraseña actualizada. Ya puedes entrar con tu nueva clave.');
