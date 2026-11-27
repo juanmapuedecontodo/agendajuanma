@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./fairy.css">
+<link rel="stylesheet" href="./grimoire.css">
 <style>
 :root{--forest:#501d5b;--forest2:#68436f;--moss:#8a6591;--sage:#b9a1bd;--paper:#f1eadb;--paper2:#e8deca;--ink:#342f29;--muted:#827968;--gold:#b99a62;--plum:#59445e;--rose:#b77d78;--line:rgba(76,65,49,.16);--shadow:0 14px 40px rgba(43,39,30,.12);--radius:20px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#e6ddc9 0,transparent 42%),linear-gradient(135deg,#e9e0ce,#f4eddf 60%,#e7decd);color:var(--ink);font-family:"DM Sans",sans-serif;min-height:100vh}
@@ -364,6 +365,10 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
     <p class="fairy-footnote">Las señales y curiosidades son un pequeño regalo diario. Las ideas de escritura no se repiten hasta que hayas descubierto toda la colección.</p>
   </section>
 
+  <section class="view" id="view-grimoire">
+   <div id="grimoireApp"></div>
+  </section>
+
   <section class="view" id="view-tarot">
   <div class="section-head">
     <div>
@@ -671,6 +676,7 @@ input,select,textarea{width:100%;border:1px solid #d6cbb8;background:#fffaf0;bor
  <button data-go="work"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/></svg></span><span>Trabajo</span></button>
  <button data-go="birthdays"><span class="ico">♡</span><span>Cumples</span></button>
  <button data-go="fairy"><span class="ico">✧</span><span>Hada</span></button>
+ <button data-go="grimoire"><span class="ico">✧</span><span>Grimorio</span></button>
  <button data-go="tarot"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M9 14c1.5-1 4.5-1 6 0M12 8v2"/></svg></span><span>Tarot</span></button>
  <button data-go="settings"><span class="ico">⚙</span><span>Ajustes</span></button>
 </nav>
@@ -681,6 +687,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { TAROT_CARDS, drawTarotCards } from './tarot.js';
 import { TAROT_STUDY } from './tarot-study.js';
 import { initFairy } from './fairy.js';
+import { initGrimoire } from './grimoire.js';
 /* CONFIGURACIÓN: URL y clave pública de TU proyecto Supabase. Nunca pongas aquí service_role. */
 const SUPABASE_URL = 'https://qykrjqyrjltxyelbybvl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_GX9Uk67nW__qAJke1Qv3zA_4BjT3dF_';
@@ -695,6 +702,7 @@ const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let session=null, profile=null, settings=null, accounts=[], events=[], tasks=[], transactions=[], transfers=[], openings=[], workShifts=[], contacts=[], selectedDate=today(), calDate=new Date(), agendaMode='week', editRecord=null, activeType=null;
 const fairyModule = initFairy({ supabase, getUserId: () => session?.user?.id });
+const grimoireModule = initGrimoire({ supabase, getUserId: () => session?.user?.id, toast });
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
 function showLogin(msg=''){ $('#login').classList.remove('hidden');$('#login').style.display='grid';$('#app').hidden=true;$('#nav').hidden=true;if(msg)$('#login-status').textContent=msg}
@@ -736,7 +744,7 @@ async function loadAll(){
  }catch(err){console.error(err);toast('No se pudieron cargar los datos: '+err.message)}
 }
 function renderAll(){renderHome();renderCalendar();renderTasks();renderEconomy();renderWork();renderBirthdays()}
-function go(view){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('#view-'+view)?.classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.go===view));if(view==='agenda')renderCalendar();window.scrollTo({top:0,behavior:'smooth'})}
+function go(view){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('#view-'+view)?.classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.go===view));if(view==='agenda')renderCalendar();if(view==='grimoire')grimoireModule.onOpen();window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 $('#searchOpen').onclick=()=>go('search');
 $('#quickAdd').onclick=()=>openForm('event');
