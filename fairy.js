@@ -271,6 +271,8 @@ export function initFairy({ supabase, getUserId }) {
 
   let currentDaily = {};
   let busy = false;
+  let currentMessage = '';
+  let currentMood = 'speaking';
 
   const localDate = () => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit'
@@ -291,6 +293,8 @@ export function initFairy({ supabase, getUserId }) {
   }
 
   function say(message, mood = 'speaking') {
+    currentMessage = message;
+    currentMood = mood;
     bubble.textContent = message;
     bubble.classList.remove('fairy-bubble-pop');
     void bubble.offsetWidth;
@@ -300,12 +304,13 @@ export function initFairy({ supabase, getUserId }) {
 
   function setDailyButtonState(type, used) {
     const button = buttons[type];
-    button.disabled = Boolean(used);
+    // Se puede volver a pulsar: si ya se mostró hoy, se recupera el mismo contenido.
+    button.disabled = false;
     button.classList.toggle('is-used', Boolean(used));
     if (type === 'whereabouts') {
-      button.innerHTML = used ? '✧ Ya te he saludado hoy' : '✧ ¿Dónde estarás hoy?';
+      button.innerHTML = used ? '✧ Volver a ver mi señal de hoy' : '✧ ¿Dónde estarás hoy?';
     } else if (type === 'curiosity') {
-      button.innerHTML = used ? '✧ Ya te he contado una' : '✧ Dime una curiosidad';
+      button.innerHTML = used ? '✧ Volver a leer mi curiosidad' : '✧ Dime una curiosidad';
     }
   }
 
@@ -334,6 +339,7 @@ export function initFairy({ supabase, getUserId }) {
     }
     if (currentDaily[type]) {
       say(currentDaily[type].content_text, type === 'whereabouts' ? 'winking' : 'speaking');
+      status.textContent = '¡Ya te lo había contado hoy! ✨ Aquí lo tienes otra vez.';
       return;
     }
     busy = true;
@@ -451,9 +457,13 @@ export function initFairy({ supabase, getUserId }) {
   ));
 
   async function onOpen() {
-    const greeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
-    say(greeting, 'speaking');
-    status.textContent = 'Tu pequeña compañera de la Mansión.';
+    // Conserva el último mensaje mientras la aplicación siga abierta.
+    // Solo genera un saludo nuevo la primera vez que se entra en la habitación.
+    if (!currentMessage) {
+      const greeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+      say(greeting, 'speaking');
+      status.textContent = 'Tu pequeña compañera de la Mansión.';
+    }
     try {
       await loadDaily();
     } catch (error) {
