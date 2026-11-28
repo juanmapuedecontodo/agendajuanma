@@ -8,9 +8,9 @@ export function initGrimoire({ supabase, getUserId, toast = () => {} }) {
     ready: false,
     diary: [], rituals: [], potions: [],
     section: 'home', diaryMode: 'calendar',
-    diaryMonth: monthKey(diariesToday()), graphMonth: monthKey(diariesToday()),
+    diaryMonth: '', graphMonth: '',
     ritualFilter: 'all', ritualSort: 'newest',
-    editing: null, searchTerm: '', selectedDiaryDate: diariesToday()
+    editing: null, searchTerm: '', selectedDiaryDate: ''
   };
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -28,6 +28,10 @@ export function initGrimoire({ supabase, getUserId, toast = () => {} }) {
     if (Number(p.hour) < 4) base.setDate(base.getDate()-1);
     return isoDate(base);
   };
+  // Inicializar las fechas después de declarar sus funciones auxiliares.
+  state.selectedDiaryDate = diariesToday();
+  state.diaryMonth = monthKey(parseDate(state.selectedDiaryDate));
+  state.graphMonth = state.diaryMonth;
   const currentMadridDateTime = () => new Date().toISOString();
   const monthBounds = key => { const [y,m]=key.split('-').map(Number); return {start:`${key}-01`,end:isoDate(new Date(y,m,0,12)),year:y,month:m}; };
   const monthLabel = key => { const {year,month}=monthBounds(key); return new Date(year,month-1,1).toLocaleDateString('es-ES',{month:'long',year:'numeric'}); };
@@ -133,7 +137,7 @@ export function initGrimoire({ supabase, getUserId, toast = () => {} }) {
     const purposes=[...new Set(state.rituals.map(x=>x.purpose).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
     let items=[...state.rituals]; if(state.ritualFilter==='favorites')items=items.filter(x=>x.is_favorite); else if(state.ritualFilter!=='all')items=items.filter(x=>x.purpose===state.ritualFilter);
     items.sort((a,b)=>state.ritualSort==='az'?a.name.localeCompare(b.name,'es'):new Date(b.created_at)-new Date(a.created_at));
-    return `<div class="grimoire-section-head"><div><span class="grimoire-kicker">TU LIBRO DE PRÁCTICAS</span><h2>Rituales</h2><p>Conserva tus rituales, materiales, procedimientos y recursos.</p></div><button class="grimoire-btn primary" data-action="new-ritual">＋ Nuevo ritual</button></div><div class="grimoire-controls"><select id="ritualFilter"><option value="all">Todos los propósitos</option><option value="favorites" ${state.ritualFilter==='favorites'?'selected':''}>★ Favoritos</option>${purposes.map(p=>`<option value="${esc(p)}" ${state.ritualFilter===p?'selected':''}>${esc(p)}</option>`).join('')}</select><select id="ritualSort"><option value="newest" ${state.ritualSort==='newest'?'selected':''}>Más recientes</option><option value="az" ${state.ritualSort==='az'?'selected':''}>Orden alfabético</option></select></div>${items.length?`<div class="grimoire-ritual-grid">${items.map(x=>`<article class="grimoire-ritual-card"><button class="grimoire-fav ${x.is_favorite?'on':''}" data-action="toggle-favorite" data-id="${x.id}" aria-label="${x.is_favorite?'Quitar de':'Añadir a'} favoritos">${x.is_favorite?'★':'☆'}</button>${safeUrl(x.image_url)?`<img src="${esc(safeUrl(x.image_url))}" alt="Ilustración de ${esc(x.name)}" loading="lazy" onerror="this.style.display='none'">`:`<div class="grimoire-ritual-placeholder">✧</div>`}<div class="grimoire-ritual-card-body"><span class="grimoire-kicker">${esc(x.purpose||'SIN PROPÓSITO')}</span><h3>${esc(x.name)}</h3><p>${esc((x.procedure||x.materials||'Sin descripción').slice(0,110))}</p><button class="grimoire-btn" data-action="view-ritual" data-id="${x.id}">Abrir página</button></div></article>`).join('')}</div>`:'<div class="grimoire-paper"><p class="grimoire-empty">${state.rituals.length?'No hay rituales en este filtro.':'Tu libro de rituales está esperando su primera página.'}</p></div>'}`;
+    return `<div class="grimoire-section-head"><div><span class="grimoire-kicker">TU LIBRO DE PRÁCTICAS</span><h2>Rituales</h2><p>Conserva tus rituales, materiales, procedimientos y recursos.</p></div><button class="grimoire-btn primary" data-action="new-ritual">＋ Nuevo ritual</button></div><div class="grimoire-controls"><select id="ritualFilter"><option value="all">Todos los propósitos</option><option value="favorites" ${state.ritualFilter==='favorites'?'selected':''}>★ Favoritos</option>${purposes.map(p=>`<option value="${esc(p)}" ${state.ritualFilter===p?'selected':''}>${esc(p)}</option>`).join('')}</select><select id="ritualSort"><option value="newest" ${state.ritualSort==='newest'?'selected':''}>Más recientes</option><option value="az" ${state.ritualSort==='az'?'selected':''}>Orden alfabético</option></select></div>${items.length?`<div class="grimoire-ritual-grid">${items.map(x=>`<article class="grimoire-ritual-card"><button class="grimoire-fav ${x.is_favorite?'on':''}" data-action="toggle-favorite" data-id="${x.id}" aria-label="${x.is_favorite?'Quitar de':'Añadir a'} favoritos">${x.is_favorite?'★':'☆'}</button>${safeUrl(x.image_url)?`<img src="${esc(safeUrl(x.image_url))}" alt="Ilustración de ${esc(x.name)}" loading="lazy" onerror="this.style.display='none'">`:`<div class="grimoire-ritual-placeholder">✧</div>`}<div class="grimoire-ritual-card-body"><span class="grimoire-kicker">${esc(x.purpose||'SIN PROPÓSITO')}</span><h3>${esc(x.name)}</h3><p>${esc((x.procedure||x.materials||'Sin descripción').slice(0,110))}</p><button class="grimoire-btn" data-action="view-ritual" data-id="${x.id}">Abrir página</button></div></article>`).join('')}</div>`:`<div class="grimoire-paper"><p class="grimoire-empty">${state.rituals.length?'No hay rituales en este filtro.':'Tu libro de rituales está esperando su primera página.'}</p></div>`}`;
   }
   function renderRitualDetail(x) {
     const resources=Array.isArray(x.extra_resources)?x.extra_resources:[];
